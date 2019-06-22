@@ -12,12 +12,17 @@ A flexible rclone program for mounting multiple cloud storage providers using rc
 - arm and arm64 are supported.
 - All binary files are downloaded from [https://rclone.org/downloads](https://rclone.org/downloads)
 - Fusermount binary downloaded from [https://forum.xda-developers.com/android/development/fusermount-android-rclone-mount-t3866652](https://forum.xda-developers.com/android/development/fusermount-android-rclone-mount-t3866652) 
+- List of supported cloud storage providers is huge.
 - All the applications can access /mnt/cloud mount points as long as there is option to set it somewhere.
 - All file explorer applications work just fine.
 - mpv (playstore) is best for playing audio and video files. Fast browsing and quick playing.
 - Dir caching is set 24h.
 - Executing mounting scripts through other applications will be seen only by that application.
 - Use adb shell only for executing mounting scripts so that all applications can see the mount points.
+- Mount points will use the names of the rclone configs.
+## Prerequisites
+- This module only needs the rclone.conf file.
+- Put your existing rclone.conf file in /sdcard/rclone.conf, create one using desktop if it does not exist.
 ## Installation
 - Flash it via Magisk Manager App.
 ## Configuration (post-installing)
