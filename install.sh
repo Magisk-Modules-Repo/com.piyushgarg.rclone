@@ -151,15 +151,13 @@ on_install() {
 
   CONFIG_PATH=$TMPDIR/config
 
-  unzip -o "$ZIPFILE" 'binary/*' -d $TMPDIR 2>/dev/null
-
   ui_print "* Creating binary path"
   mkdir -p $MODPATH/system/bin 2>/dev/null
 
   ui_print "* Copying $TMPDIR/binary/rclone-$ARCH binary"
-  cp -af $TMPDIR/binary/rclone-${ARCH} $MODPATH/system/bin/rclone
+  unzip -p "$ZIPFILE" binary/rclone-${ARCH} > $MODPATH/system/bin/rclone
   ui_print "* Copying $TMPDIR/binary/fusermount-$ARCH binary"
-  cp -af $TMPDIR/binary/fusermount-${ARCH} $MODPATH/system/bin/fusermount
+  unzip -p "$ZIPFILE" binary/fusermount-${ARCH} > $MODPATH/system/bin/fusermount
 
 }
 
