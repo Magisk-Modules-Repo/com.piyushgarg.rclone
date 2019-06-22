@@ -9,7 +9,8 @@ MODDIR=""
 #sleep 120
 echo "UNmounting remotes..."
 CONFIGFILE=/sdcard/rclone.conf
-CLOUDROOTMOUNTPOINT=/mnt/cloud
+HOME=/mnt
+CLOUDROOTMOUNTPOINT=$HOME/cloud/
 mkdir -p $CLOUDROOTMOUNTPOINT
 
 $MODDIR/system/bin/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
