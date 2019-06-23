@@ -26,7 +26,7 @@ $MODDIR/system/bin/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
         while read line; do
                 echo "mounting... $line"
                 mkdir -p ${CLOUDROOTMOUNTPOINT}/${line}
-                $MODDIR/system/bin/rclone mount ${line}: ${CLOUDROOTMOUNTPOINT}/${line} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode writes --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 168h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=/storage/cache --cache-chunk-path /storage/cache-backend/ --cache-chunk-clean-interval 10m0s --log-file /sdcard/dns.log --allow-other --gid 1015 --daemon
+                $MODDIR/system/bin/rclone mount ${line}: ${CLOUDROOTMOUNTPOINT}/${line} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode writes --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 168h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=/storage/cache --cache-chunk-path /storage/cache-backend/ --cache-chunk-clean-interval 10m0s --log-file /sdcard/rclone.log --allow-other --gid 1015 --daemon
                 sleep 5
         done
 
