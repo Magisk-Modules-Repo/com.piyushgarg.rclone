@@ -131,7 +131,7 @@ print_modname() {
   ui_print "*           rclone            *"
   ui_print "*******************************"
   ui_print " "
-}
+  ui_print "***Found $ARCH ..."
 
 # Copy/extract your module files into $MODPATH in on_install.
 
