@@ -1,6 +1,6 @@
 id=rclone-mount
 name=rclone-mount
-version=v1.1
-versionCode=100
+version=v1.2
+versionCode=102
 author=rclone
 description=rclone mount

@@ -22,7 +22,7 @@
 # Set to true if you do *NOT* want Magisk to mount
 # any files for you. Most modules would NOT want
 # to set this flag to true
-SKIPMOUNT=false
+SKIPMOUNT=true
 
 # Set to true if you need to load system.prop
 PROPFILE=false
@@ -150,16 +150,14 @@ on_install() {
   fi
 
   CONFIG_PATH=$TMPDIR/config
+  
+  ui_print "* Architecture: $ARCH"
+  ui_print "* Extracting package contents..."
 
-  unzip -o "$ZIPFILE" 'binary/*' -d $TMPDIR 2>/dev/null
-
-  ui_print "* Creating binary path"
-  mkdir -p $MODPATH/system/bin 2>/dev/null
-
-  ui_print "* Copying $TMPDIR/binary/rclone-$ARCH binary"
-  cp -af $TMPDIR/binary/rclone-${ARCH} $MODPATH/system/bin/rclone
-  ui_print "* Copying $TMPDIR/binary/fusermount-$ARCH binary"
-  cp -af $TMPDIR/binary/fusermount-${ARCH} $MODPATH/system/bin/fusermount
+  ui_print "* Extracting rclone-$ARCH to $MODPATH/rclone"
+  unzip -p "$ZIPFILE" binary/rclone-${ARCH} > $MODPATH/rclone
+  ui_print "* Extracting fusermount-$ARCH to $MODPATH/fusermount"
+  unzip -p "$ZIPFILE" binary/fusermount-${ARCH} > $MODPATH/fusermount
 
 }
 
@@ -171,8 +169,8 @@ on_install() {
 set_permissions() {
   # The following is the default rule, DO NOT remove
   set_perm_recursive $MODPATH 0 0 0755 0644
-  set_perm $MODPATH/system/bin/rclone 0 0 0755
-  set_perm $MODPATH/system/bin/fusermount 0 0 0755
+  set_perm $MODPATH/rclone 0 0 0755
+  set_perm $MODPATH/fusermount 0 0 0755
   # Here are some examples:
   # set_perm_recursive  $MODPATH/system/lib       0     0       0755      0644
   # set_perm  $MODPATH/system/bin/app_process32   0     2000    0755      u:object_r:zygote_exec:s0
