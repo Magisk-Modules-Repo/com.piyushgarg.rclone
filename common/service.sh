@@ -88,25 +88,25 @@ if [[ -e $USER_CONF ]]; then
     
 fi
 
-if [[ -e /sdcard/.rclone/.nocache ]]; then
+if [[ -e $USER_CONFDIR/.nocache ]]; then
 
     CACHEMODE=off
     
 fi
 
-if [[ -e /sdcard/.mincache ]]; then
+if [[ -e $USER_CONFDIR/.mincache ]]; then
 
     CACHEMODE=minimal
     
 fi
 
-if [[ -e /sdcard/.writecache ]]; then
+if [[ -e $USER_CONFDIR/.writecache ]]; then
 
     CACHEMODE=writes
     
 fi
 
-if [[ -e /sdcard/.fullcache ]]; then
+if [[ -e $USER_CONFDIR/.fullcache ]]; then
 
     CACHEMODE=full
     
