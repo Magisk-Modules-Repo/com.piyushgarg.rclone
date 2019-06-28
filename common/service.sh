@@ -2,45 +2,76 @@
 # Do NOT assume where your module will be located.
 # ALWAYS use $MODDIR if you need to know where this script
 # and module is placed.
-# This will make sure your module will still work
-# if Magisk change its mount point in the future
+# This will make sure your module will work
+# if Magisk changes it's mount point in the future
+
 MODDIR=${0%/*}
-IMG=/sbin/.core/img
-id=rclone-mount
 
-if [ -d $IMG/$id ]; then
+#. $MODDIR/module.prop >> /dev/null 2>&1
 
-    ln -sf $IMG/$id/rclone /sbin/rclone
-    ln -sf $IMG/$id/fusermount /sbin/fusermount
+IMGDIR=/sbin/.core/img
+id=com.piyushgarg.rclone
 
+if [ -d $IMGDIR/$id ]; then
+
+    ln -sf $IMGDIR/$id/rclone /sbin/rclone
+    ln -sf $IMGDIR/$id/fusermount /sbin/fusermount
+    ln -sf $IMGDIR/$id/rclone-mount /sbin/rclone-mount
 else
 
     ln -sf $MODDIR/rclone /sbin/rclone
     ln -sf $MODDIR/fusermount /sbin/fusermount
+    ln -sf $MODDIR/rclone-mount /sbin/rclone-mount
     
 fi
 
 #RCLONE PARAMETERS
-BUFFERSIZE=8M
+BUFFERSIZE=1M
 CACHEMAXSIZE=256M
 DIRCACHETIME=24h
 READAHEAD=128k
+CACHEMODE=writes
 
-CONFIGFILE=/sdcard/rclone.conf
+USER_CONF=/sdcard/rclone.conf
+CONFIGFILE=$MODDIR/rclone.conf
 LOGFILE=/sdcard/rclone.log
 HOME=/mnt
 CLOUDROOTMOUNTPOINT=$HOME/cloud
-CACHE=/mnt/runtime/default/rclone-cache
-CACHE_BACKEND=/mnt/runtime/default/rc-cache-backend
+CACHE=/data/rclone/cache
+CACHE_BACKEND=/data/rclone/cache-backend
 
-mkdir -p $CLOUDROOTMOUNTPOINT
-mkdir -p $CACHE
-mkdir -p $CACHE_BACKEND
+if [[ ! -d $CLOUDROOTMOUNTPOINT ]]; then
 
-ln -sf $CLOUDROOTMOUNTPOINT /mnt/runtime/read/cloud
-ln -sf $CLOUDROOTMOUNTPOINT /mnt/runtime/write/cloud
+    mkdir -p $CLOUDROOTMOUNTPOINT
 
-until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) = 1 ]] && [[ $(getprop service.bootanim.exit) = 1 ]] && [[ $(getprop init.svc.bootanim) = stopped ]] && [[ -e $CONFIGFILE ]] || [[ $COUNT -eq 100 ]]; do
+fi
+
+if [[ ! -d $CACHE ]]; then
+
+    mkdir -p $CACHE
+
+fi
+
+if [[ ! -d $CACHE_BACKEND ]]; then
+
+
+    mkdir -p $CACHE_BACKEND
+
+fi
+
+if [[ ! -L /mnt/runtime/read/cloud ]]; then
+
+    ln -sf $CLOUDROOTMOUNTPOINT /mnt/runtime/read/cloud
+    
+fi
+
+if [[ ! -L /mnt/runtime/write/cloud ]]; then
+    
+    ln -sf $CLOUDROOTMOUNTPOINT /mnt/runtime/write/cloud
+    
+fi
+
+until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) = 1 ]] && [[ $(getprop service.bootanim.exit) = 1 ]] && [[ $(getprop init.svc.bootanim) = stopped ]] && [[ -e $USER_CONF ]] || [[ $COUNT -eq 240 ]]; do
 
 
     sleep 5
@@ -49,19 +80,23 @@ until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) 
     
 done
 
+if [[ -e $USER_CONF ]]; then
+
+    cp $USER_CONF $CONFIGFILE
+    chmod 0600 $CONFIGFILE
+    
+fi    
+
 sleep 10
 
-#sh -c "$MODDIR/system/bin/rclone mount piyushDOTgarg_shopDOTmega: ${CLOUDROOTMOUNTPOINT}/piyushDOTgarg_shopDOTmega -vv --config ${CONFIGFILE} --attr-timeout 10m --cache-dir=/storage/cache --vfs-cache-mode writes --vfs-cache-max-age 168h0m0s --log-file /sdcard/dns.log --allow-other --gid 1015" &
-
-echo "mounting remotes..."
-
-$MODDIR/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
+/sbin/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
         while read line; do
                 echo "mounting... $line"
                 mkdir -p ${CLOUDROOTMOUNTPOINT}/${line}
-                $MODDIR/rclone mount ${line}: ${CLOUDROOTMOUNTPOINT}/${line} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode writes --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 168h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon
+                /sbin/rclone mount ${line}: ${CLOUDROOTMOUNTPOINT}/${line} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --cache-chunk-no-memory  --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon
                 sleep 5
         done
 
+echo
 echo "...done"
 
