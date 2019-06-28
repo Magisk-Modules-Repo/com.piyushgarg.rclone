@@ -124,14 +124,13 @@ REPLACE="
 print_modname() {
   ui_print " "
   ui_print "*******************************"
-  ui_print "*       rclone-mount          *"
+  ui_print "*        rclone-mount         *"
   ui_print "*        Magisk Module        *"
+  ui_print "*       by: piyushgarg        *"
   ui_print "*******************************"
-  ui_print "*        v1.1-alpha1          *"
-  ui_print "*           rclone            *"
+  ui_print "*rclone: (v1.47.0) mod: (v1.2)*"
   ui_print "*******************************"
-  ui_print " "
-  ui_print "***Found $ARCH ..."
+}
 
 # Copy/extract your module files into $MODPATH in on_install.
 
@@ -151,14 +150,15 @@ on_install() {
 
   CONFIG_PATH=$TMPDIR/config
   
-  ui_print "* Architecture: $ARCH"
-  ui_print "* Extracting package contents..."
+  ui_print "* Detected arch: $ARCH"
+  ui_print "+ Extracting package contents..."
 
-  ui_print "* Extracting rclone-$ARCH to $MODPATH/rclone"
+  ui_print "+ Extracting rclone-$ARCH to $MODPATH/rclone"
   unzip -p "$ZIPFILE" binary/rclone-${ARCH} > $MODPATH/rclone
-  ui_print "* Extracting fusermount-$ARCH to $MODPATH/fusermount"
+  ui_print "+ Extracting fusermount-$ARCH to $MODPATH/fusermount"
   unzip -p "$ZIPFILE" binary/fusermount-${ARCH} > $MODPATH/fusermount
-
+  ui_print "+ Extracting rclone-mount script to $MODPATH/rclone-mount"
+  unzip -p "$ZIPFILE" binary/rclone-mount > $MODPATH/rclone-mount
 }
 
 # Only some special files require specific permissions
@@ -171,6 +171,8 @@ set_permissions() {
   set_perm_recursive $MODPATH 0 0 0755 0644
   set_perm $MODPATH/rclone 0 0 0755
   set_perm $MODPATH/fusermount 0 0 0755
+  set_perm $MODPATH/rclone-mount 0 0 0755
+  set_perm $MODPATH/service.sh 0 0 0500
   # Here are some examples:
   # set_perm_recursive  $MODPATH/system/lib       0     0       0755      0644
   # set_perm  $MODPATH/system/bin/app_process32   0     2000    0755      u:object_r:zygote_exec:s0
