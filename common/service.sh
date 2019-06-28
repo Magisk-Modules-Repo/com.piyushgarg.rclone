@@ -85,7 +85,31 @@ if [[ -e $USER_CONF ]]; then
     cp $USER_CONF $CONFIGFILE
     chmod 0600 $CONFIGFILE
     
-fi    
+fi
+
+if [[ -e /sdcard/.nocache ]]; then
+
+    CACHEMODE=off
+    
+fi
+
+if [[ -e /sdcard/.mincache ]]; then
+
+    CACHEMODE=minimal
+    
+fi
+
+if [[ -e /sdcard/.writecache ]]; then
+
+    CACHEMODE=writes
+    
+fi
+
+if [[ -e /sdcard/.fullcache ]]; then
+
+    CACHEMODE=full
+    
+fi
 
 sleep 10
 
