@@ -32,7 +32,8 @@ DIRCACHETIME=24h
 READAHEAD=128k
 CACHEMODE=writes
 
-USER_CONF=/sdcard/rclone.conf
+USER_CONFDIR=/sdcard/.rclone
+USER_CONF=$USER_CONFDIR/rclone.conf
 CONFIGFILE=$MODDIR/rclone.conf
 LOGFILE=/sdcard/rclone.log
 HOME=/mnt
@@ -87,7 +88,7 @@ if [[ -e $USER_CONF ]]; then
     
 fi
 
-if [[ -e /sdcard/.nocache ]]; then
+if [[ -e /sdcard/.rclone/.nocache ]]; then
 
     CACHEMODE=off
     
@@ -115,6 +116,11 @@ sleep 10
 
 /sbin/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
         while read line; do
+               
+                if [[ -e $USER_CONFDIR/.$line-cachemode ]]; then 
+                    . $USER_CONFDIR/.$line-cachemode
+                fi
+                
                 echo "mounting... $line"
                 mkdir -p ${CLOUDROOTMOUNTPOINT}/${line}
                 /sbin/rclone mount ${line}: ${CLOUDROOTMOUNTPOINT}/${line} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon
