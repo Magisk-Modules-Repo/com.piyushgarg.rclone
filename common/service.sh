@@ -7,7 +7,6 @@
 
 MODDIR=${0%/*}
 
-
 #. $MODDIR/module.prop >> /dev/null 2>&1
 
 IMGDIR=/sbin/.core/img
@@ -33,7 +32,6 @@ CONFIGFILE=$MODDIR/rclone.conf
 LOGFILE=/sdcard/rclone.log
 HOME=/mnt
 CLOUDROOTMOUNTPOINT=$HOME/cloud
-
 
 #RCLONE PARAMETERS
 BUFFERSIZE=8M
