@@ -7,6 +7,7 @@
 
 MODDIR=${0%/*}
 
+
 #. $MODDIR/module.prop >> /dev/null 2>&1
 
 IMGDIR=/sbin/.core/img
@@ -25,21 +26,33 @@ else
     
 fi
 
-#RCLONE PARAMETERS
-BUFFERSIZE=8M
-CACHEMAXSIZE=256M
-DIRCACHETIME=24h
-READAHEAD=128k
-CACHEMODE=writes
-
+#MODULE VARS
 USER_CONFDIR=/sdcard/.rclone
 USER_CONF=$USER_CONFDIR/rclone.conf
 CONFIGFILE=$MODDIR/rclone.conf
 LOGFILE=/sdcard/rclone.log
 HOME=/mnt
 CLOUDROOTMOUNTPOINT=$HOME/cloud
+
+
+#RCLONE PARAMETERS
+BUFFERSIZE=8M
+CACHEMAXSIZE=256M
+DIRCACHETIME=24h
+READAHEAD=128k
+CACHEMODE=writes
 CACHE=/data/rclone/cache
 CACHE_BACKEND=/data/rclone/cache-backend
+
+custom_params () {
+    
+    if [[ -e $USER_CONFDIR/.$line.param ]]; then 
+    
+        . $USER_CONFDIR/.$line.param
+
+    fi
+
+}
 
 if [[ ! -d $CLOUDROOTMOUNTPOINT ]]; then
 
@@ -74,11 +87,9 @@ fi
 
 until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) = 1 ]] && [[ $(getprop service.bootanim.exit) = 1 ]] && [[ $(getprop init.svc.bootanim) = stopped ]] && [[ -e $USER_CONF ]] || [[ $COUNT -eq 240 ]]; do
 
-
     sleep 5
     ((++COUNT))
-    
-    
+
 done
 
 if [[ -e $USER_CONF ]]; then
@@ -116,11 +127,7 @@ sleep 10
 
 /sbin/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
         while read line; do
-               
-                if [[ -e $USER_CONFDIR/.$line-cachemode ]]; then 
-                    . $USER_CONFDIR/.$line-cachemode
-                fi
-                
+                custom_params
                 echo "mounting... $line"
                 mkdir -p ${CLOUDROOTMOUNTPOINT}/${line}
                 /sbin/rclone mount ${line}: ${CLOUDROOTMOUNTPOINT}/${line} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon
