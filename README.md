@@ -1,6 +1,8 @@
 ## rclone-mount for Android
 ---
 
+<div style="text-align: center"> <img src="https://hitcounter.pythonanywhere.com/count/tag.svg?url=https%3A%2F%2Fgithub.com%2Magisk-Modules-Repo%2com.piyushgarg.rclone" alt="Hits"> </div>
+
 Mount cloud storage locally via rclone & fusermount directly on your Android powered smart device. 
 
 Now you can have virtually limitless storage expansion with support for dozens of cloud providers. Extremely useful for devices without physical storage expansion capabilities & streaming large media files without need for full caching. Binaries obtained directly from rclone.org. 
