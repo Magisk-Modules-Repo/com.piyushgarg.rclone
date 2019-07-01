@@ -43,13 +43,26 @@ CACHE=/data/rclone/cache
 CACHE_BACKEND=/data/rclone/cache-backend
 
 custom_params () {
-    
-    if [[ -e $USER_CONFDIR/.$line.param ]]; then 
-    
-        . $USER_CONFDIR/.$line.param
+
+    BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
+
+    if [[ -e $USER_CONFDIR/.$remote.param ]]; then 
+
+        if ! egrep -q -iv "$BAD_SYNTAX" $USER_CONFDIR/.$remote.param; then
+
+            while read -r VAR; do
+
+                eval $(echo "${VAR}" |cut -d ' ' -f 1)
+                echo "${VAR}" |cut -d ' ' -f 1
+            done < $USER_CONFDIR/.$remote.param
+
+        else
+
+            echo ".$remote.param contains bad syntax"
+
+        fi
 
     fi
-
 }
 
 if [[ ! -d $CLOUDROOTMOUNTPOINT ]]; then
@@ -125,13 +138,14 @@ sleep 10
 
 /sbin/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
         while read line; do
+                remote=$line
                 custom_params
-                echo "mounting... $line"
+                echo "mounting... $remote"
                 mkdir -p ${CLOUDROOTMOUNTPOINT}/${line}
-                /sbin/rclone mount ${line}: ${CLOUDROOTMOUNTPOINT}/${line} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon
+                /sbin/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon
                 sleep 5
         done
-
+echo CACHEMODE="$CACHEMODE"
 echo
 echo "...done"
 
