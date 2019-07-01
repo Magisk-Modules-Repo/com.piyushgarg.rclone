@@ -44,17 +44,26 @@ CACHE_BACKEND=/data/rclone/cache-backend
 
 custom_params () {
 
+    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME READAHEAD CACHEMODE"
     BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
 
     if [[ -e $USER_CONFDIR/.$remote.param ]]; then 
 
         if ! egrep -q -iv "$BAD_SYNTAX" $USER_CONFDIR/.$remote.param; then
 
-            while read -r VAR; do
+            for PARAM in ${PARAMS[@]}; do
 
-                eval $(echo "${VAR}" |cut -d ' ' -f 1)
-                echo "${VAR}" |cut -d ' ' -f 1
-            done < $USER_CONFDIR/.$remote.param
+                while read -r VAR; do
+
+                    if [[ "$(echo "${VAR}" |grep -w "$PARAM")" ]]; then
+
+                        eval $(echo "${VAR}" |cut -d ' ' -f 1)
+ 
+                    fi
+
+                done < $USER_CONFDIR/.$remote.param
+
+            done
 
         else
 
@@ -63,6 +72,7 @@ custom_params () {
         fi
 
     fi
+
 }
 
 if [[ ! -d $CLOUDROOTMOUNTPOINT ]]; then
@@ -78,7 +88,6 @@ if [[ ! -d $CACHE ]]; then
 fi
 
 if [[ ! -d $CACHE_BACKEND ]]; then
-
 
     mkdir -p $CACHE_BACKEND
 
@@ -145,7 +154,6 @@ sleep 10
                 /sbin/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon
                 sleep 5
         done
-echo CACHEMODE="$CACHEMODE"
 echo
 echo "...done"
 
