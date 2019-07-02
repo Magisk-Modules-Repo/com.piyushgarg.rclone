@@ -128,7 +128,7 @@ print_modname() {
   ui_print "*        Magisk Module        *"
   ui_print "*       by: piyushgarg        *"
   ui_print "*******************************"
-  ui_print "*rclone: (v1.47.0) mod: (v1.2)*"
+  ui_print "*rclone: (v1.47.0) mod: (v1.3)*"
   ui_print "*******************************"
 }
 
@@ -149,7 +149,7 @@ on_install() {
   fi
 
   CONFIG_PATH=$TMPDIR/config
-  
+
   ui_print "* Detected arch: $ARCH"
   ui_print "+ Extracting package contents..."
 
