@@ -1,6 +1,6 @@
 ## rclone-mount for Android
 
-![Hits](https://hitcounter.pythonanywhere.com/count/tag.svg?url=https%3A%2F%2Fgithub.com%2FMagisk-Modules-Repo%2Fcom.piyushgarg.rclone)
+[![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
 ---
 
 Mount cloud storage locally via rclone & fusermount directly on your Android powered smart device. 
