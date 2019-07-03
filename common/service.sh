@@ -27,11 +27,7 @@ fi
 
 #MODULE VARS
 USER_CONFDIR=/sdcard/.rclone
-
-#/sdcard/rclone.conf is really a sensitive file containing all the important tokens and is exposed to all the apps.
-#Do we really want to keep it there after use? Lets decide and close the loop.
 USER_CONF=$USER_CONFDIR/rclone.conf
-
 CONFIGFILE=$MODDIR/rclone.conf
 LOGFILE=/sdcard/rclone.log
 HOME=/mnt
@@ -147,28 +143,17 @@ if [[ -e $USER_CONFDIR/.fullcache ]]; then
     
 fi
 
-echo CACHEMODE will be ${CACHEMODE}.
-
 sleep 10
 
 /sbin/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
-        while read remote; do
-
-                #ignore the remote which is not required by the user.
-                if [[ -e "${USER_CONFDIR}/${remote}.skip" ]]; then
-                    echo "ignored ${remote} as requested."
-                    continue
-                fi
-
+        while read line; do
+                remote=$line
                 custom_params
-                echo "[$remote] will be available at -> [${CLOUDROOTMOUNTPOINT}/${remote}]"
-                mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
+                echo "mounting... $remote"
+                mkdir -p ${CLOUDROOTMOUNTPOINT}/${line}
                 /sbin/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon
                 sleep 5
         done
-
-#as of now serving over http that can be browsed through.
-/sbin/rclone serve http ${CLOUDROOTMOUNTPOINT} --addr 127.0.0.1:38762 --no-checksum --no-modtime --read-only &
-
 echo
 echo "...done"
+
