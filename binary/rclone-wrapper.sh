@@ -19,6 +19,17 @@ else
     
 fi
 
+help () { 
+    
+    $HOME/rclone help
+    echo
+    echo 'Wrapper Commands:'
+    echo '  disable         Disable a specified remote which exist in rclone.conf.'
+    echo '  remount         Remount the remotes inside rclone.conf except disabled.'
+    echo '  unmount         Kill rclone & unmount all remotes.'
+
+}
+
 disable () {
     
     echo "disabling remote ${2}"
@@ -55,6 +66,14 @@ elif [[ ${1} = unmount ]]; then
 
     unmount
     
+elif [[ ${1} = help ]]; then
+
+    help
+
+elif [[ -z ${1} ]]; then
+
+    help
+
 else
 
     $HOME/rclone $*
