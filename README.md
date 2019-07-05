@@ -106,3 +106,8 @@ For more detailed configuration of rclone please refer to [official documentatio
 * Specify custom params for individual remotes via /sdcard/.rclone/.REMOTENAME.params
 
  
+### v1.4
+* Add ability to disable a remote 
+* Add a wrapper script for rclone
+* Make remount possible with adb via `su --mount-master -c`
+

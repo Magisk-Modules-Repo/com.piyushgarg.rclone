@@ -1,4 +1,4 @@
-#!/system/bin/sh
+#!/system/xbin/bash
 # Do NOT assume where your module will be located.
 # ALWAYS use $MODDIR if you need to know where this script
 # and module is placed.
@@ -7,21 +7,22 @@
 
 MODDIR=${0%/*}
 
-#. $MODDIR/module.prop >> /dev/null 2>&1
-
 IMGDIR=/sbin/.core/img
 id=com.piyushgarg.rclone
 
-if [ -d $IMGDIR/$id ]; then
+if [ -d ${IMGDIR}/${id} ]; then
 
-    ln -sf $IMGDIR/$id/rclone /sbin/rclone
-    ln -sf $IMGDIR/$id/fusermount /sbin/fusermount
-    ln -sf $IMGDIR/$id/rclone-mount /sbin/rclone-mount
+    ln -sf ${IMGDIR}/${id}/rclone-wrapper.sh /sbin/rclone
+    ln -sf ${IMGDIR}/${id}/fusermount /sbin/fusermount
+    ln -sf ${IMGDIR}/${id}/rclone-mount /sbin/rclone-mount
+    HOME=${IMGDIR}/${id}
+
 else
 
-    ln -sf $MODDIR/rclone /sbin/rclone
-    ln -sf $MODDIR/fusermount /sbin/fusermount
-    ln -sf $MODDIR/rclone-mount /sbin/rclone-mount
+    ln -sf ${MODDIR}/rclone-wrapper.sh /sbin/rclone
+    ln -sf ${MODDIR}/fusermount /sbin/fusermount
+    ln -sf ${MODDIR}/rclone-mount /sbin/rclone-mount
+    HOME=${MODDIR}
     
 fi
 
@@ -30,14 +31,15 @@ USER_CONFDIR=/sdcard/.rclone
 
 #/sdcard/rclone.conf is really a sensitive file containing all the important tokens and is exposed to all the apps.
 #Do we really want to keep it there after use? Lets decide and close the loop.
-USER_CONF=$USER_CONFDIR/rclone.conf
+USER_CONF=${USER_CONFDIR}/rclone.conf
 
-CONFIGFILE=$MODDIR/rclone.conf
+CONFIGFILE=${HOME}/.config/rclone/rclone.conf
 LOGFILE=/sdcard/rclone.log
-HOME=/mnt
-CLOUDROOTMOUNTPOINT=$HOME/cloud
+HOME=${MODDIR}
+CLOUDROOTMOUNTPOINT=/mnt/cloud
 
 #RCLONE PARAMETERS
+DISABLE=0
 BUFFERSIZE=8M
 CACHEMAXSIZE=256M
 DIRCACHETIME=24h
@@ -46,90 +48,97 @@ CACHEMODE=writes
 CACHE=/data/rclone/cache
 CACHE_BACKEND=/data/rclone/cache-backend
 
+if [[ -e ${USER_CONFDIR}/.disable ]]; then 
+
+    exit 0
+    
+fi
+
 custom_params () {
 
-    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME READAHEAD CACHEMODE"
+    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME READAHEAD CACHEMODE DISABLE"
+
     BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
 
-    if [[ -e $USER_CONFDIR/.$remote.param ]]; then 
+    if [[ -e ${USER_CONFDIR}/.${remote}.param ]] && [[ ! $(egrep -q -iv "${BAD_SYNTAX}" ${USER_CONFDIR}/.${remote}.param) ]]; then
 
-        if ! egrep -q -iv "$BAD_SYNTAX" $USER_CONFDIR/.$remote.param; then
+            echo "loading .${remote}.param"
 
             for PARAM in ${PARAMS[@]}; do
 
                 while read -r VAR; do
 
-                    if [[ "$(echo "${VAR}" |grep -w "$PARAM")" ]]; then
+                    if [[ "$(echo "${VAR}" |grep -w "${PARAM}")" ]]; then
 
+                        echo "Importing ${VAR}"
                         eval $(echo "${VAR}" |cut -d ' ' -f 1)
- 
+
                     fi
 
-                done < $USER_CONFDIR/.$remote.param
+                done < ${USER_CONFDIR}/.${remote}.param
 
             done
 
-        else
+    else
 
-            echo ".$remote.param contains bad syntax"
+        echo ".${remote}.param contains bad syntax"
 
-        fi
 
     fi
 
 }
 
-if [[ ! -d $CLOUDROOTMOUNTPOINT ]]; then
+if [[ ! -d ${CLOUDROOTMOUNTPOINT} ]]; then
 
-    mkdir -p $CLOUDROOTMOUNTPOINT
-
-fi
-
-if [[ ! -d $CACHE ]]; then
-
-    mkdir -p $CACHE
+    mkdir -p ${CLOUDROOTMOUNTPOINT}
 
 fi
 
-if [[ ! -d $CACHE_BACKEND ]]; then
+if [[ ! -d ${CACHE} ]]; then
 
-    mkdir -p $CACHE_BACKEND
+    mkdir -p ${CACHE}
+
+fi
+
+if [[ ! -d ${CACHE_BACKEND} ]]; then
+
+    mkdir -p ${CACHE_BACKEND}
 
 fi
 
 if [[ ! -L /mnt/runtime/read/cloud ]]; then
 
-    ln -sf $CLOUDROOTMOUNTPOINT /mnt/runtime/read/cloud
+    ln -sf ${CLOUDROOTMOUNTPOINT} /mnt/runtime/read/cloud
     
 fi
 
 if [[ ! -L /mnt/runtime/write/cloud ]]; then
     
-    ln -sf $CLOUDROOTMOUNTPOINT /mnt/runtime/write/cloud
+    ln -sf ${CLOUDROOTMOUNTPOINT} /mnt/runtime/write/cloud
     
 fi
 
-until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) = 1 ]] && [[ $(getprop service.bootanim.exit) = 1 ]] && [[ $(getprop init.svc.bootanim) = stopped ]] && [[ -e $USER_CONF ]] || [[ $COUNT -eq 240 ]]; do
+until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) = 1 ]] && [[ $(getprop service.bootanim.exit) = 1 ]] && [[ $(getprop init.svc.bootanim) = stopped ]] && [[ -e ${USER_CONF} ]] || [[ ${COUNT} -eq 240 ]]; do
 
     sleep 5
     ((++COUNT))
 
 done
 
-if [[ -e $USER_CONF ]]; then
+if [[ -e ${USER_CONF} ]]; then
 
-    cp $USER_CONF $CONFIGFILE
-    chmod 0600 $CONFIGFILE
+    cp ${USER_CONF} ${CONFIGFILE}
+    chmod 0600 ${CONFIGFILE}
     
 fi
 
-if [[ -e $USER_CONFDIR/.nocache ]]; then
+if [[ -e ${USER_CONFDIR}/.nocache ]]; then
 
     CACHEMODE=off
     
 fi
 
-if [[ -e $USER_CONFDIR/.mincache ]]; then
+if [[ -e ${USER_CONFDIR}/.mincache ]]; then
 
     CACHEMODE=minimal
     
@@ -147,28 +156,38 @@ if [[ -e $USER_CONFDIR/.fullcache ]]; then
     
 fi
 
-echo CACHEMODE will be ${CACHEMODE}.
-
 sleep 10
 
-/sbin/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
-        while read remote; do
+echo "Default CACHEMODE ${CACHEMODE}"
 
-                #ignore the remote which is not required by the user.
-                if [[ -e "${USER_CONFDIR}/${remote}.skip" ]]; then
-                    echo "ignored ${remote} as requested."
+$HOME/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
+        while read remote; do
+        
+                echo
+        
+                DISABLE=0
+        
+                custom_params
+
+#ignore the remote which is not required by the user
+
+                if [[ ${DISABLE} = 1 ]] || [[ -e ${USER_CONFDIR}/.${remote}.disable ]]; then
+
+                    echo "${remote} disabled by user"
                     continue
+
                 fi
 
-                custom_params
-                echo "[$remote] will be available at -> [${CLOUDROOTMOUNTPOINT}/${remote}]"
+                echo "[${remote}] available at: -> [${CLOUDROOTMOUNTPOINT}/${remote}]"
                 mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
-                /sbin/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon
+               su --mount-master -c $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon
                 sleep 5
         done
 
 #as of now serving over http that can be browsed through.
 /sbin/rclone serve http ${CLOUDROOTMOUNTPOINT} --addr 127.0.0.1:38762 --no-checksum --no-modtime --read-only &
+
+/sbin/rclone serve ftp ${CLOUDROOTMOUNTPOINT} --addr 0.0.0.0:38763 --no-checksum --no-modtime --read-only &
 
 echo
 echo "...done"

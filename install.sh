@@ -159,6 +159,8 @@ on_install() {
   unzip -p "$ZIPFILE" binary/fusermount-${ARCH} > $MODPATH/fusermount
   ui_print "+ Extracting rclone-mount script to $MODPATH/rclone-mount"
   unzip -p "$ZIPFILE" binary/rclone-mount > $MODPATH/rclone-mount
+  ui_print "+ Extracting rclone-wrapper.sh script to $MODPATH/rclone-mount"
+  unzip -p "$ZIPFILE" binary/rclone-wrapper.sh > $MODPATH/rclone-wrapper.sh
 }
 
 # Only some special files require specific permissions
@@ -173,6 +175,7 @@ set_permissions() {
   set_perm $MODPATH/fusermount 0 0 0755
   set_perm $MODPATH/rclone-mount 0 0 0755
   set_perm $MODPATH/service.sh 0 0 0500
+  set_perm $MODPATH/rclone-wrapper.sh 0 0 0500
   # Here are some examples:
   # set_perm_recursive  $MODPATH/system/lib       0     0       0755      0644
   # set_perm  $MODPATH/system/bin/app_process32   0     2000    0755      u:object_r:zygote_exec:s0
