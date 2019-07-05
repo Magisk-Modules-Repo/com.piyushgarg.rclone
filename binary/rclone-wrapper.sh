@@ -1,4 +1,4 @@
-#!/system/xbin/bash
+#!/system/bin/sh
 
 MODDIR=${0%/*}
 
@@ -15,12 +15,12 @@ if [ -d ${IMGDIR}/${id} ]; then
 
 else
 
-    HOME=$={MODDIR}
-    
+    HOME=${MODDIR}
+
 fi
 
 help () { 
-    
+
     $HOME/rclone help
     echo
     echo 'Wrapper Commands:'
@@ -33,19 +33,19 @@ help () {
 disable () {
     
     echo "disabling remote ${2}"
-    touch $USER_CONFDIR/.${2}.disable
+    touch ${USER_CONFDIR}/.${2}.disable
+
 }
 
 unmount () {
-    
+
     kill $(pgrep -f rclone| grep -v $SCRIPTPID) >> /dev/null 2>&1
-    sleep 3
+    sleep 1
     umount -f ${CLOUDROOTMOUNTPOINT}/* >> /dev/null 2>&1
     sleep 3
     rm -r ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
 
 }
-
 
 remount () { 
 
@@ -61,11 +61,11 @@ if [[ ${1} = disable ]]; then
 elif [[ ${1} = remount ]]; then
 
     remount
-    
+
 elif [[ ${1} = unmount ]]; then
 
     unmount
-    
+
 elif [[ ${1} = help ]]; then
 
     help
@@ -76,7 +76,6 @@ elif [[ -z ${1} ]]; then
 
 else
 
-    $HOME/rclone $*
+    ${HOME}/rclone $*
     
 fi
-

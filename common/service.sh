@@ -1,4 +1,4 @@
-#!/system/xbin/bash
+#!/system/bin/sh
 # Do NOT assume where your module will be located.
 # ALWAYS use $MODDIR if you need to know where this script
 # and module is placed.
@@ -23,7 +23,7 @@ else
     ln -sf ${MODDIR}/fusermount /sbin/fusermount
     ln -sf ${MODDIR}/rclone-mount /sbin/rclone-mount
     HOME=${MODDIR}
-    
+
 fi
 
 #MODULE VARS
@@ -47,11 +47,14 @@ READAHEAD=128k
 CACHEMODE=writes
 CACHE=/data/rclone/cache
 CACHE_BACKEND=/data/rclone/cache-backend
+HTTP_ADDR=127.0.0.1:38762
+FTP_ADDR=127.0.0.1:38763
+
 
 if [[ -e ${USER_CONFDIR}/.disable ]]; then 
 
     exit 0
-    
+
 fi
 
 custom_params () {
@@ -60,29 +63,32 @@ custom_params () {
 
     BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
 
-    if [[ -e ${USER_CONFDIR}/.${remote}.param ]] && [[ ! $(egrep -q -iv "${BAD_SYNTAX}" ${USER_CONFDIR}/.${remote}.param) ]]; then
+    if [[ -e $USER_CONFDIR/.$remote.param ]]; then
+    
+        echo "Found .$remote.param"
 
-            echo "loading .${remote}.param"
+        if ! [[ $(egrep -q -iv "$BAD_SYNTAX" $USER_CONFDIR/.$remote.param) ]]; then
+
+            echo "loading .$remote.param"
 
             for PARAM in ${PARAMS[@]}; do
 
                 while read -r VAR; do
 
-                    if [[ "$(echo "${VAR}" |grep -w "${PARAM}")" ]]; then
-
+                    if [[ "$(echo "${VAR}" |grep -w "$PARAM")" ]]; then
                         echo "Importing ${VAR}"
                         eval $(echo "${VAR}" |cut -d ' ' -f 1)
-
                     fi
 
-                done < ${USER_CONFDIR}/.${remote}.param
+                done < $USER_CONFDIR/.$remote.param
 
             done
 
-    else
+        else
 
-        echo ".${remote}.param contains bad syntax"
+            echo ".$remote.param contains bad syntax"
 
+        fi
 
     fi
 
@@ -160,16 +166,15 @@ sleep 10
 
 echo "Default CACHEMODE ${CACHEMODE}"
 
-$HOME/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
-        while read remote; do
-        
-                echo
-        
-                DISABLE=0
-        
-                custom_params
+${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
 
-#ignore the remote which is not required by the user
+        while read remote; do
+
+                echo
+
+                DISABLE=0
+
+                custom_params
 
                 if [[ ${DISABLE} = 1 ]] || [[ -e ${USER_CONFDIR}/.${remote}.disable ]]; then
 
@@ -180,14 +185,21 @@ $HOME/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
 
                 echo "[${remote}] available at: -> [${CLOUDROOTMOUNTPOINT}/${remote}]"
                 mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
-               su --mount-master -c $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon
+                su -M -p -c $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon >> /dev/null 2>&1
                 sleep 5
         done
 
-#as of now serving over http that can be browsed through.
-/sbin/rclone serve http ${CLOUDROOTMOUNTPOINT} --addr 127.0.0.1:38762 --no-checksum --no-modtime --read-only &
+echo
 
-/sbin/rclone serve ftp ${CLOUDROOTMOUNTPOINT} --addr 0.0.0.0:38763 --no-checksum --no-modtime --read-only &
+/sbin/rclone serve http ${CLOUDROOTMOUNTPOINT} --addr ${HTTP_ADDR} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &
+
+echo "Notice: /mnt/cloud served via HTTP at: http://${HTTP_ADDR}"
+
+/sbin/rclone serve ftp ${CLOUDROOTMOUNTPOINT} --addr ${FTP_ADDR} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &
+
+echo "Notice: /mnt/cloud served via FTP at: ftp://${FTP_ADDR}"
 
 echo
 echo "...done"
+
+exit

@@ -11,7 +11,7 @@ Now you can have virtually limitless storage expansion with support for dozens o
 
 - Huge list of supported cloud storage providers
 
-- Applications with ability to specify paths can access /mnt/cloud
+- Apps with ability to specify paths can access /mnt/cloud
 
 - Most file explorers work just fine
 
@@ -21,11 +21,15 @@ Now you can have virtually limitless storage expansion with support for dozens o
 
 - Executed mount scripts through other applications will be seen only by that application.
 
-- Use adb shell only for executing mounting scripts so that all applications can see the mount points
-
 - Mount points use names of remote(s) in rclone.conf
 
 - Specify custom rclone params for each remote via `/sdcard/.rclone/.REMOTENAME.param`
+
+- Access remotes via http://127.0.0.1:38762
+
+- Access remotes via ftp://127.0.0.1:38763
+
+
 
 ## Configuration (post-installing)
 
@@ -47,7 +51,9 @@ For more detailed configuration of rclone please refer to [official documentatio
 
    Where `*` is replace with name of remote
 
-- List of available parameters and their default values:
+- For parameters and their default values:
+
+  <details><summary> SHOW ME </summary> <p>
 
         BUFFERSIZE=8M
 
@@ -63,7 +69,9 @@ For more detailed configuration of rclone please refer to [official documentatio
 
         CACHE_BACKEND=/data/rclone/cache-backend
 
- **NOTE:** _There is no need to specify values you do not wish to change._
+   **NOTE:** _There is no need to specify values you do not wish to change._
+  </p> </details>
+
 ## Known Issues
 
 - VLC  takes a long time to load media as it opens file in write mode when using it's internal browser. 
@@ -75,7 +83,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 - Can not mount remotes until device is unlocked 
 
 - Not responsilbe for any loss.
-Be
+
 ## Credits
 
 - rclone devs
@@ -94,18 +102,19 @@ Be
 * Change install process
 * Changes for full systemless
 * Improve mount reliability
-* Symlink mountpoint to /storage/
+* Symlink mountpoint to `/storage/`
 
 ### v1.3
-* Move user rclone.conf & related to /sdcard/.rclone/
-* Control global --vfs-cache-mode via simple files placed in /sdcard/.rclone/
-* Specify custom params for individual remotes via /sdcard/.rclone/.REMOTENAME.params
+* Move user rclone.conf & related to `/sdcard/.rclone/`
+* Control global `--vfs-cache-mode` via simple files placed in `/sdcard/.rclone/`
+* Specify custom params for individual remotes via `/sdcard/.rclone/.REMOTENAME.params`
 
  
 ### v1.4
 * Add ability to disable a remote 
 * Add a wrapper script for rclone
-* Make remount possible with adb via `su --mount-master -c`
+* Access remotes via http & ftp
+* Make remount possible without adb via `su --mount-master -c`
 
 </p> </details>
 
