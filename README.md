@@ -1,6 +1,4 @@
 ## rclone-mount for Android
-
-[![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
 ---
 
 Mount cloud storage locally via rclone & fusermount directly on your Android powered smart device. 
@@ -33,9 +31,9 @@ Now you can have virtually limitless storage expansion with support for dozens o
 
 1. Copy your rclone.conf file to `/sdcard/.rclone/rclone.conf`
 
-2. Add custom params at `/sdcard/.rclone/.*.params`
+2. Add custom params at `/sdcard/.rclone/.*.params` (if needed)
 
-3. Reboot or run `rclone-mount` from terminal
+3. Reboot or run `rclone remount` from terminal
 
 4. All your rclone mount points will show up under `/mnt/cloud/` & `/storage/cloud`
 
@@ -49,11 +47,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 
    Where `*` is replace with name of remote
 
-
-
 - List of available parameters and their default values:
-  
-      There is no need to specify values you do not wish to change.
 
         BUFFERSIZE=8M
 
@@ -69,18 +63,19 @@ For more detailed configuration of rclone please refer to [official documentatio
 
         CACHE_BACKEND=/data/rclone/cache-backend
 
+ **NOTE:** _There is no need to specify values you do not wish to change._
 ## Known Issues
 
 - VLC  takes a long time to load media as it opens file in write mode when using it's internal browser. 
 
-    Create remote type alias for media dirs in rclone.conf and specify `CACHEMODE=off` in `/sdcard/.rclone/.ALIASNAME.param`
+   Create remote type alias for media dirs in rclone.conf and specify `CACHEMODE=off` in `/sdcard/.rclone/.ALIASNAME.param`
 
 - Mount point can not be placed in `/sdcard/`
 
 - Can not mount remotes until device is unlocked 
 
 - Not responsilbe for any loss.
-
+Be
 ## Credits
 
 - rclone devs
@@ -89,6 +84,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 - fusermount binaries from  [xda-devs](https://forum.xda-developers.com/android/development/fusermount-android-rclone-mount-t3866652)
 
 ## Changelog
+<details><summary>CLICK HERE</summary> <p>
 
 ### v1.1
 * Initial release
@@ -111,3 +107,9 @@ For more detailed configuration of rclone please refer to [official documentatio
 * Add a wrapper script for rclone
 * Make remount possible with adb via `su --mount-master -c`
 
+</p> </details>
+
+<br>
+
+[![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
+</br>
