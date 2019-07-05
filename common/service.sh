@@ -50,6 +50,11 @@ CACHE_BACKEND=/data/rclone/cache-backend
 HTTP_ADDR=127.0.0.1:38762
 FTP_ADDR=127.0.0.1:38763
 
+if [[ ! -d ${HOME}/.config/rclone ]]; then
+
+    mkdir -p ${HOME}/.config/rclone
+
+fi
 
 if [[ -e ${USER_CONFDIR}/.disable ]]; then 
 
