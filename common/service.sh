@@ -8,9 +8,17 @@
 MODDIR=${0%/*}
 
 IMGDIR=/sbin/.core/img
+UPDDIR=/data/adb/modules_update
 id=com.piyushgarg.rclone
 
-if [ -d ${IMGDIR}/${id} ]; then
+if [ -e ${UPDDIR}/${id}/rclone-wrapper.sh ]; then
+
+    ln -sf ${UPDDIR}/${id}/rclone-wrapper.sh /sbin/rclone
+    ln -sf ${UPDDIR}/${id}/fusermount /sbin/fusermount
+    ln -sf ${UPDDIR}/${id}/rclone-mount /sbin/rclone-mount
+    HOME=${UPDDIR}/${id}
+
+elif [ -e ${IMGDIR}/${id}/rclone-wrapper.sh ]; then
 
     ln -sf ${IMGDIR}/${id}/rclone-wrapper.sh /sbin/rclone
     ln -sf ${IMGDIR}/${id}/fusermount /sbin/fusermount

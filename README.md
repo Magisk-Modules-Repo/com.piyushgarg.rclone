@@ -114,6 +114,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 * Add ability to disable a remote 
 * Add a wrapper script for rclone
 * Access remotes via http & ftp
+* Use without rebooting device
 * Make remount possible without adb via `su --mount-master -c`
 
 </p> </details>

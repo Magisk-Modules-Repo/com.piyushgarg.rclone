@@ -1,7 +1,7 @@
 #!/system/bin/sh
 
 MODDIR=${0%/*}
-
+UPDDIR=/data/adb/modules_update
 IMGDIR=/sbin/.core/img
 id=com.piyushgarg.rclone
 
@@ -9,9 +9,13 @@ USER_CONFDIR=/sdcard/.rclone
 CLOUDROOTMOUNTPOINT=/mnt/cloud
 SCRIPTPID=$$
 
-if [ -d ${IMGDIR}/${id} ]; then
+if [ -e ${UPDDIR}/${id}/rclone ]; then
 
-    HOME=${IMGDIR}/${id}
+    HOME=${UPDDIR}/${id}
+    
+elif [ -e ${IMGDIR}/${id}/rclone ]; then
+
+     HOME=${IMGDIR}/${id}
 
 else
 

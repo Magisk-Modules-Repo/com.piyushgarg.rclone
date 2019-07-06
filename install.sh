@@ -128,7 +128,7 @@ print_modname() {
   ui_print "*        Magisk Module        *"
   ui_print "*       by: piyushgarg        *"
   ui_print "*******************************"
-  ui_print "*rclone: (v1.47.0) mod: (v1.3)*"
+  ui_print "*rclone: (v1.47.0) mod: (v1.4)*"
   ui_print "*******************************"
 }
 
@@ -176,6 +176,12 @@ set_permissions() {
   set_perm $MODPATH/rclone-mount 0 0 0755
   set_perm $MODPATH/service.sh 0 0 0500
   set_perm $MODPATH/rclone-wrapper.sh 0 0 0500
+  ln -sf $MODPATH/rclone-wrapper.sh /sbin/rclone
+  ui_print "✓ Now no need to reboot..."
+  ui_print "+ Attempting to mount your [Remotes]:"
+  ui_print "+ please wait..."
+  ui_print ""
+  $MODPATH/rclone-wrapper.sh remount
   # Here are some examples:
   # set_perm_recursive  $MODPATH/system/lib       0     0       0755      0644
   # set_perm  $MODPATH/system/bin/app_process32   0     2000    0755      u:object_r:zygote_exec:s0
