@@ -7,6 +7,7 @@ Now you can have virtually limitless storage expansion with support for dozens o
 
 ---
 ## Features
+
 - Support for arm, arm64, & x86
 
 - Huge list of supported cloud storage providers
@@ -65,22 +66,23 @@ For more detailed configuration of rclone please refer to [official documentatio
 
         CACHEMODE=writes
 
-        CACHE=/data/rclone/cache
-
-        CACHE_BACKEND=/data/rclone/cache-backend
 
    **NOTE:** _There is no need to specify values you do not wish to change._
   </p> </details>
+
+   For for information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)
 
 ## Known Issues
 
 - VLC  takes a long time to load media as it opens file in write mode when using it's internal browser. 
 
-   Create remote type alias for media dirs in rclone.conf and specify `CACHEMODE=off` in `/sdcard/.rclone/.ALIASNAME.param`
+   -Create remote type alias for media dirs in rclone.conf and specify `CACHEMODE=off` in `/sdcard/.rclone/.ALIASNAME.param`
 
 - Mount point can not be placed in `/sdcard/`
 
 - Can not mount remotes until device is unlocked 
+
+- Encrypted `rclone.conf` causes reboots
 
 - Not responsilbe for any loss.
 
@@ -115,7 +117,8 @@ For more detailed configuration of rclone please refer to [official documentatio
 * Add a wrapper script for rclone
 * Access remotes via http & ftp
 * Use without rebooting device
-* Make remount possible without adb via `su --mount-master -c`
+* Add wrapper cmds to `rclone help`
+* Make remount possible without adb via `su -M -c`
 
 </p> </details>
 
