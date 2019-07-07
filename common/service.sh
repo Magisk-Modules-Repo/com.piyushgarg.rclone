@@ -36,11 +36,7 @@ fi
 
 #MODULE VARS
 USER_CONFDIR=/sdcard/.rclone
-
-#/sdcard/rclone.conf is really a sensitive file containing all the important tokens and is exposed to all the apps.
-#Do we really want to keep it there after use? Lets decide and close the loop.
 USER_CONF=${USER_CONFDIR}/rclone.conf
-
 CONFIGFILE=${HOME}/.config/rclone/rclone.conf
 LOGFILE=/sdcard/rclone.log
 HOME=${MODDIR}
