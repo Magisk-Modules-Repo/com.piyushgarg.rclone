@@ -41,6 +41,7 @@ CONFIGFILE=${HOME}/.config/rclone/rclone.conf
 LOGFILE=/sdcard/rclone.log
 HOME=${MODDIR}
 CLOUDROOTMOUNTPOINT=/mnt/cloud
+RUNTIME_MNT=/mnt/runtime/default/emulated/0/cloud
 
 #RCLONE PARAMETERS
 DISABLE=0
@@ -103,6 +104,8 @@ custom_params () {
 
 }
 
+sleep 5
+
 if [[ ! -d ${CLOUDROOTMOUNTPOINT} ]]; then
 
     mkdir -p ${CLOUDROOTMOUNTPOINT}
@@ -139,6 +142,14 @@ until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) 
     ((++COUNT))
 
 done
+
+if [[ -d /data/media/0/cloud ]] || [[ -d /sdcard/cloud ]] && [[ -d /mnt/runtime ]]; then
+
+sleep 1
+
+su -M -c /system/bin/mount -o rw,noatime -o rbind ${CLOUDROOTMOUNTPOINT} ${RUNTIME_MNT}
+
+fi
 
 if [[ -e ${USER_CONF} ]]; then
 
