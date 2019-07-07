@@ -1,6 +1,4 @@
 ## rclone-mount for Android
-
-[![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
 ---
 
 Mount cloud storage locally via rclone & fusermount directly on your Android powered smart device. 
@@ -9,11 +7,12 @@ Now you can have virtually limitless storage expansion with support for dozens o
 
 ---
 ## Features
+
 - Support for arm, arm64, & x86
 
 - Huge list of supported cloud storage providers
 
-- Applications with ability to specify paths can access /mnt/cloud
+- Apps with ability to specify paths can access /mnt/cloud
 
 - Most file explorers work just fine
 
@@ -23,19 +22,23 @@ Now you can have virtually limitless storage expansion with support for dozens o
 
 - Executed mount scripts through other applications will be seen only by that application.
 
-- Use adb shell only for executing mounting scripts so that all applications can see the mount points
-
 - Mount points use names of remote(s) in rclone.conf
 
 - Specify custom rclone params for each remote via `/sdcard/.rclone/.REMOTENAME.param`
+
+- Access remotes via http://127.0.0.1:38762
+
+- Access remotes via ftp://127.0.0.1:38763
+
+
 
 ## Configuration (post-installing)
 
 1. Copy your rclone.conf file to `/sdcard/.rclone/rclone.conf`
 
-2. Add custom params at `/sdcard/.rclone/.*.params`
+2. Add custom params at `/sdcard/.rclone/.*.params` (if needed)
 
-3. Reboot or run `rclone-mount` from terminal
+3. Reboot or run `rclone remount` from terminal
 
 4. All your rclone mount points will show up under `/mnt/cloud/` & `/storage/cloud`
 
@@ -49,11 +52,9 @@ For more detailed configuration of rclone please refer to [official documentatio
 
    Where `*` is replace with name of remote
 
+- For parameters and their default values:
 
-
-- List of available parameters and their default values:
-  
-      There is no need to specify values you do not wish to change.
+  <details><summary> SHOW ME </summary> <p>
 
         BUFFERSIZE=8M
 
@@ -65,19 +66,23 @@ For more detailed configuration of rclone please refer to [official documentatio
 
         CACHEMODE=writes
 
-        CACHE=/data/rclone/cache
 
-        CACHE_BACKEND=/data/rclone/cache-backend
+   **NOTE:** _There is no need to specify values you do not wish to change._
+  </p> </details>
+
+   For for information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)
 
 ## Known Issues
 
 - VLC  takes a long time to load media as it opens file in write mode when using it's internal browser. 
 
-    Create remote type alias for media dirs in rclone.conf and specify `CACHEMODE=off` in `/sdcard/.rclone/.ALIASNAME.param`
+   -Create remote type alias for media dirs in rclone.conf and specify `CACHEMODE=off` in `/sdcard/.rclone/.ALIASNAME.param`
 
 - Mount point can not be placed in `/sdcard/`
 
 - Can not mount remotes until device is unlocked 
+
+- Encrypted `rclone.conf` causes reboots
 
 - Not responsilbe for any loss.
 
@@ -89,6 +94,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 - fusermount binaries from  [xda-devs](https://forum.xda-developers.com/android/development/fusermount-android-rclone-mount-t3866652)
 
 ## Changelog
+<details><summary>CLICK HERE</summary> <p>
 
 ### v1.1
 * Initial release
@@ -98,11 +104,25 @@ For more detailed configuration of rclone please refer to [official documentatio
 * Change install process
 * Changes for full systemless
 * Improve mount reliability
-* Symlink mountpoint to /storage/
+* Symlink mountpoint to `/storage/`
 
 ### v1.3
-* Move user rclone.conf & related to /sdcard/.rclone/
-* Control global --vfs-cache-mode via simple files placed in /sdcard/.rclone/
-* Specify custom params for individual remotes via /sdcard/.rclone/.REMOTENAME.params
+* Move user rclone.conf & related to `/sdcard/.rclone/`
+* Control global `--vfs-cache-mode` via simple files placed in `/sdcard/.rclone/`
+* Specify custom params for individual remotes via `/sdcard/.rclone/.REMOTENAME.params`
 
  
+### v1.4
+* Add ability to disable a remote 
+* Add a wrapper script for rclone
+* Access remotes via http & ftp
+* Use without rebooting device
+* Add wrapper cmds to `rclone help`
+* Make remount possible without adb via `su -M -c`
+
+</p> </details>
+
+<br>
+
+[![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
+</br>
