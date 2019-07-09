@@ -7,6 +7,11 @@ id=com.piyushgarg.rclone
 
 USER_CONFDIR=/sdcard/.rclone
 CLOUDROOTMOUNTPOINT=/mnt/cloud
+RUNTIME_MNT_R=/mnt/runtime/read/emulated/0/cloud
+RUNTIME_MNT_W=/mnt/runtime/write/emulated/0/cloud
+RUNTIME_MNT_DEF=/mnt/runtime/default/emulated/0/cloud
+DATA_MNT=/data/media/0/cloud
+
 SCRIPTPID=$$
 
 if [ -e ${UPDDIR}/${id}/rclone ]; then
@@ -15,7 +20,7 @@ if [ -e ${UPDDIR}/${id}/rclone ]; then
     
 elif [ -e ${IMGDIR}/${id}/rclone ]; then
 
-     HOME=${IMGDIR}/${id}
+    HOME=${IMGDIR}/${id}
 
 else
 
@@ -43,11 +48,29 @@ disable () {
 
 unmount () {
 
-    kill $(pgrep -f rclone| grep -v $SCRIPTPID) >> /dev/null 2>&1
+    echo "Killing & Unmounting Remotes...."
+    
+    kill $(pgrep -f rclone| grep -v ${SCRIPTPID}) >> /dev/null 2>&1
+    
     sleep 1
-    umount -f ${CLOUDROOTMOUNTPOINT}/* >> /dev/null 2>&1
-    sleep 3
-    rm -r ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
+    
+    umount -lf ${CLOUDROOTMOUNTPOINT}/* >> /dev/null 2>&1
+    
+    umount -lf ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
+    
+    if [[ -e ${USER_CONFDIR}/.bindsd ]]; then
+    
+        umount -lf ${RUNTIME_MNT_DEF}/ >> /dev/null 2>&1
+        
+        umount -lf ${RUNTIME_MNT_DEF} >> /dev/null 2>&1
+    
+        su -M -c $HOME/rclone purge ${RUNTIME_MNT_DEF} >> /dev/null 2>&1
+    
+        su -M -c $HOME/rclone purge ${DATA_MNT} >> /dev/null 2>&1
+    
+    fi
+    
+    $HOME/rclone purge ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
 
 }
 

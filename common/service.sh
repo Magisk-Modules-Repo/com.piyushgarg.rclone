@@ -38,20 +38,22 @@ fi
 USER_CONFDIR=/sdcard/.rclone
 USER_CONF=${USER_CONFDIR}/rclone.conf
 CONFIGFILE=${HOME}/.config/rclone/rclone.conf
-LOGFILE=/sdcard/rclone.log
-HOME=${MODDIR}
+LOGFILE=${USER_CONFDIR}/rclone.log
 CLOUDROOTMOUNTPOINT=/mnt/cloud
-RUNTIME_MNT=/mnt/runtime/default/emulated/0/cloud
+RUNTIME_R=/mnt/runtime/read
+RUNTIME_W=/mnt/runtime/write
+RUNTIME_DEF=/mnt/runtime/default
+SD_BINDPOINT=$RUNTIME_DEF/emulated/0/cloud
 
 #RCLONE PARAMETERS
 DISABLE=0
 BUFFERSIZE=8M
-CACHEMAXSIZE=256M
+CACHEMAXSIZE=128M
 DIRCACHETIME=24h
 READAHEAD=128k
-CACHEMODE=writes
-CACHE=/data/rclone/cache
-CACHE_BACKEND=/data/rclone/cache-backend
+CACHEMODE=off
+CACHE=/data/media/0/.cache
+CACHE_BACKEND=/data/media/0/.cache-backend
 HTTP_ADDR=127.0.0.1:38762
 FTP_ADDR=127.0.0.1:38763
 
@@ -61,15 +63,9 @@ if [[ ! -d ${HOME}/.config/rclone ]]; then
 
 fi
 
-if [[ -e ${USER_CONFDIR}/.disable ]]; then 
-
-    exit 0
-
-fi
-
 custom_params () {
 
-    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME READAHEAD CACHEMODE DISABLE"
+    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME READAHEAD CACHEMODE DISABLE READONLY"
 
     BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
 
@@ -102,39 +98,18 @@ custom_params () {
 
     fi
 
+
 }
 
-sleep 5
 
-if [[ ! -d ${CLOUDROOTMOUNTPOINT} ]]; then
 
-    mkdir -p ${CLOUDROOTMOUNTPOINT}
+NET_CHK() {
 
-fi
+    ping -c 5 google.com
 
-if [[ ! -d ${CACHE} ]]; then
+}
 
-    mkdir -p ${CACHE}
-
-fi
-
-if [[ ! -d ${CACHE_BACKEND} ]]; then
-
-    mkdir -p ${CACHE_BACKEND}
-
-fi
-
-if [[ ! -L /mnt/runtime/read/cloud ]]; then
-
-    ln -sf ${CLOUDROOTMOUNTPOINT} /mnt/runtime/read/cloud
-    
-fi
-
-if [[ ! -L /mnt/runtime/write/cloud ]]; then
-    
-    ln -sf ${CLOUDROOTMOUNTPOINT} /mnt/runtime/write/cloud
-    
-fi
+COUNT=0
 
 until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) = 1 ]] && [[ $(getprop service.bootanim.exit) = 1 ]] && [[ $(getprop init.svc.bootanim) = stopped ]] && [[ -e ${USER_CONF} ]] || [[ ${COUNT} -eq 240 ]]; do
 
@@ -143,11 +118,69 @@ until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) 
 
 done
 
-if [[ -d /data/media/0/cloud ]] || [[ -d /sdcard/cloud ]] && [[ -d /mnt/runtime ]]; then
+if [[ -e ${USER_CONFDIR}/.disable ]]; then 
 
-sleep 1
+    exit 0
 
-su -M -c /system/bin/mount -o rw,noatime -o rbind ${CLOUDROOTMOUNTPOINT} ${RUNTIME_MNT}
+fi
+
+if [[ ! -d ${CLOUDROOTMOUNTPOINT} ]]; then
+
+    mkdir -p ${CLOUDROOTMOUNTPOINT}
+    chown media_rw:media_rw ${CLOUDROOTMOUNTPOINT}
+    touch ${CLOUDROOTMOUNTPOINT}/.nomedia
+    chmod 0644 ${CLOUDROOTMOUNTPOINT}/.nomedia
+
+fi
+
+if [[ ! -e ${CLOUDROOTMOUNTPOINT}/.nomedia ]]; then
+
+    touch ${CLOUDROOTMOUNTPOINT}/.nomedia
+    chmod 0644 ${CLOUDROOTMOUNTPOINT}/.nomedia
+
+fi
+
+if [[ ! -d ${CACHE} ]]; then
+
+    mkdir -p ${CACHE}
+    chown media_rw:media_rw ${CACHE}
+    chmod 0775 ${CACHE}
+
+fi
+
+chown media_rw:media_rw ${CACHE_BACKEND}
+chmod 0775 ${CACHE_BACKEND}
+
+if [[ ! -d ${CACHE_BACKEND} ]]; then
+
+    mkdir -p ${CACHE_BACKEND}
+
+fi
+    
+chown media_rw:media_rw ${CACHE_BACKEND}
+chmod 0775 ${CACHE_BACKEND}
+
+if [[ ! -L ${RUNTIME_R}/cloud ]]; then
+
+    ln -sf ${CLOUDROOTMOUNTPOINT} ${RUNTIME_R}/cloud
+    
+fi
+
+if [[ ! -L ${RUNTIME_W}/cloud ]]; then
+
+    ln -sf ${CLOUDROOTMOUNTPOINT} ${RUNTIME_W}/cloud
+
+fi
+
+if [[ ! -d ${SD_BINDPOINT} ]] && [[ -e $USER_CONFDIR/.bindsd ]]; then
+
+   su -M -c mkdir ${SD_BINDPOINT} >> /dev/null 2>&1
+
+fi
+
+if [[ -d ${RUNTIME_DEF} ]] && [[ ! -e ${SD_BINDPOINT}/.bound ]] && [[ -e $USER_CONFDIR/.bindsd ]]; then
+
+    su -M -c mount -o bind ${CLOUDROOTMOUNTPOINT} ${SD_BINDPOINT} && touch ${CLOUDROOTMOUNTPOINT}/.bound
 
 fi
 
@@ -155,34 +188,39 @@ if [[ -e ${USER_CONF} ]]; then
 
     cp ${USER_CONF} ${CONFIGFILE}
     chmod 0600 ${CONFIGFILE}
-    
+
 fi
 
 if [[ -e ${USER_CONFDIR}/.nocache ]]; then
 
     CACHEMODE=off
-    
+
 fi
 
 if [[ -e ${USER_CONFDIR}/.mincache ]]; then
 
     CACHEMODE=minimal
-    
+
 fi
 
 if [[ -e $USER_CONFDIR/.writecache ]]; then
 
     CACHEMODE=writes
-    
+
 fi
 
 if [[ -e $USER_CONFDIR/.fullcache ]]; then
 
     CACHEMODE=full
-    
+
 fi
 
-sleep 10
+until NET_CHK || [[ ${COUNT} = 60 ]]; do 
+
+    sleep 5
+    ((++COUNT))
+
+done >> /dev/null 2>&1
 
 echo "Default CACHEMODE ${CACHEMODE}"
 
@@ -193,6 +231,7 @@ ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
                 echo
 
                 DISABLE=0
+                READONLY=0
 
                 custom_params
 
@@ -203,11 +242,21 @@ ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
 
                 fi
 
+                if [[ ${READONLY} = 1 ]]; then
+
+                     READONLY=" --read-only "
+
+                else
+
+                     READONLY=" "
+                fi
+
                 echo "[${remote}] available at: -> [${CLOUDROOTMOUNTPOINT}/${remote}]"
                 mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
-                su -M -p -c $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 2M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --log-file ${LOGFILE} --allow-other --gid 1015 --daemon >> /dev/null 2>&1
+                su -M -p -c $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --cache-db-path ${CACHE_BACKEND} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 8M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --cache-workers 1 --log-file ${LOGFILE} --allow-other --uid 1023 --gid 1023 --cache-chunk-no-memory ${READONLY} --daemon >> /dev/null 2>&1
+
                 sleep 5
-        done
+                done
 
 echo
 
