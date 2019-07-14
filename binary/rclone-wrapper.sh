@@ -58,7 +58,7 @@ unmount () {
     
     umount -lf ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
     
-    if [[ -e ${USER_CONFDIR}/.bindsd ]]; then
+    #if [[ -e ${USER_CONFDIR}/.bindsd ]]; then
     
         umount -lf ${RUNTIME_MNT_DEF}/ >> /dev/null 2>&1
         
@@ -68,7 +68,7 @@ unmount () {
     
         su -M -c $HOME/rclone purge ${DATA_MNT} >> /dev/null 2>&1
     
-    fi
+    #fi
     
     $HOME/rclone purge ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
 
@@ -92,7 +92,11 @@ elif [[ ${1} = remount ]]; then
 elif [[ ${1} = unmount ]]; then
 
     unmount
+    
+elif [[ ${1} = config ]]; then
 
+     ${HOME}/rclone config && cp ${HOME}/.config/rclone/rclone.conf ${USER_CONFDIR}/rclone.conf && echo && ${HOME}/rclone-wrapper.sh remount
+     
 elif [[ ${1} = help ]]; then
 
     help
