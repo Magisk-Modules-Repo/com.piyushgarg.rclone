@@ -39,23 +39,33 @@ USER_CONFDIR=/sdcard/.rclone
 USER_CONF=${USER_CONFDIR}/rclone.conf
 CONFIGFILE=${HOME}/.config/rclone/rclone.conf
 LOGFILE=${USER_CONFDIR}/rclone.log
-CLOUDROOTMOUNTPOINT=/mnt/cloud
+LOGLEVEL=NOTICE
 RUNTIME_R=/mnt/runtime/read
 RUNTIME_W=/mnt/runtime/write
 RUNTIME_DEF=/mnt/runtime/default
 SD_BINDPOINT=$RUNTIME_DEF/emulated/0/cloud
+CLOUDROOTMOUNTPOINT=/mnt/cloud
 
 #RCLONE PARAMETERS
 DISABLE=0
-BUFFERSIZE=8M
-CACHEMAXSIZE=128M
-DIRCACHETIME=24h
-READAHEAD=128k
+BUFFERSIZE=0
+CACHEMAXSIZE=5M
+DIRCACHETIME=1h
+ATTRTIMEOUT=1h
+CACHEINFOAGE=1h
+READAHEAD=64k
 CACHEMODE=off
-CACHE=/data/media/0/.cache
-CACHE_BACKEND=/data/media/0/.cache-backend
+CACHE=${USER_CONFDIR}/.cache
+CACHE_BACKEND=${USER_CONFDIR}/.cache-backend
 HTTP_ADDR=127.0.0.1:38762
 FTP_ADDR=127.0.0.1:38763
+
+if [[ -z ${INTERACTIVE} ]]; then
+
+    INTERACTIVE=0
+
+fi
+
 
 if [[ ! -d ${HOME}/.config/rclone ]]; then
 
@@ -101,8 +111,6 @@ custom_params () {
 
 }
 
-
-
 NET_CHK() {
 
     ping -c 5 google.com
@@ -111,12 +119,24 @@ NET_CHK() {
 
 COUNT=0
 
-until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) = 1 ]] && [[ $(getprop service.bootanim.exit) = 1 ]] && [[ $(getprop init.svc.bootanim) = stopped ]] && [[ -e ${USER_CONF} ]] || [[ ${COUNT} -eq 240 ]]; do
+if [[ ${INTERACTIVE} = 0 ]]; then
 
-    sleep 5
-    ((++COUNT))
+    until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) = 1 ]] && [[ $(getprop service.bootanim.exit) = 1 ]] && [[ $(getprop init.svc.bootanim) = stopped ]] && [[ -e ${USER_CONF} ]] || [[ ${COUNT} -eq 240 ]]; do
 
-done
+        sleep 5
+        ((++COUNT))
+
+    done
+
+fi
+
+sleep 5
+
+if [[ ${COUNT} -eq 240 ]] || [[ ! -d /sdcard/Android ]]; then
+
+    exit 0
+
+fi
 
 if [[ -e ${USER_CONFDIR}/.disable ]]; then 
 
@@ -127,7 +147,7 @@ fi
 if [[ ! -d ${CLOUDROOTMOUNTPOINT} ]]; then
 
     mkdir -p ${CLOUDROOTMOUNTPOINT}
-    chown media_rw:media_rw ${CLOUDROOTMOUNTPOINT}
+    chown root:sdcard_rw ${CLOUDROOTMOUNTPOINT}
     touch ${CLOUDROOTMOUNTPOINT}/.nomedia
     chmod 0644 ${CLOUDROOTMOUNTPOINT}/.nomedia
 
@@ -143,13 +163,13 @@ fi
 if [[ ! -d ${CACHE} ]]; then
 
     mkdir -p ${CACHE}
-    chown media_rw:media_rw ${CACHE}
+    chown root:sdcard_rw ${CACHE}
     chmod 0775 ${CACHE}
 
 fi
 
-chown media_rw:media_rw ${CACHE_BACKEND}
-chmod 0775 ${CACHE_BACKEND}
+chown root:sdcard_rw ${CACHE}
+chmod 0775 ${CACHE}
 
 if [[ ! -d ${CACHE_BACKEND} ]]; then
 
@@ -157,7 +177,7 @@ if [[ ! -d ${CACHE_BACKEND} ]]; then
 
 fi
     
-chown media_rw:media_rw ${CACHE_BACKEND}
+chown root:sdcard_rw ${CACHE_BACKEND}
 chmod 0775 ${CACHE_BACKEND}
 
 if [[ ! -L ${RUNTIME_R}/cloud ]]; then
@@ -172,15 +192,24 @@ if [[ ! -L ${RUNTIME_W}/cloud ]]; then
 
 fi
 
-if [[ ! -d ${SD_BINDPOINT} ]] && [[ -e $USER_CONFDIR/.bindsd ]]; then
+if [[ ! -L ${RUNTIME_DEF}/cloud ]]; then
 
-   su -M -c mkdir ${SD_BINDPOINT} >> /dev/null 2>&1
+    ln -sf ${CLOUDROOTMOUNTPOINT} ${RUNTIME_DEF}/cloud
 
 fi
 
+if [[ ! -d ${SD_BINDPOINT} ]] && [[ -e $USER_CONFDIR/.bindsd ]]; then
+
+   mkdir ${SD_BINDPOINT} >> /dev/null 2>&1
+
+fi
+
+chown root:sdcard_rw ${SD_BINDPOINT}
+chmod 0775 ${SD_BINDPOINT}
+
 if [[ -d ${RUNTIME_DEF} ]] && [[ ! -e ${SD_BINDPOINT}/.bound ]] && [[ -e $USER_CONFDIR/.bindsd ]]; then
 
-    su -M -c mount -o bind ${CLOUDROOTMOUNTPOINT} ${SD_BINDPOINT} && touch ${CLOUDROOTMOUNTPOINT}/.bound
+    su -M -p -c mount -o noatime,bind ${CLOUDROOTMOUNTPOINT} ${SD_BINDPOINT} && touch ${CLOUDROOTMOUNTPOINT}/.bound
 
 fi
 
@@ -252,8 +281,10 @@ ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
                 fi
 
                 echo "[${remote}] available at: -> [${CLOUDROOTMOUNTPOINT}/${remote}]"
+                
                 mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
-                su -M -p -c $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --max-read-ahead ${READAHEAD} --buffer-size ${BUFFERSIZE} --cache-db-path ${CACHE_BACKEND} --dir-cache-time ${DIRCACHETIME} --poll-interval 5m --attr-timeout ${DIRCACHETIME} --vfs-cache-mode ${CACHEMODE} --vfs-read-chunk-size 8M --vfs-read-chunk-size-limit 10M --vfs-cache-max-age 10h0m0s --vfs-cache-max-size ${CACHEMAXSIZE} --cache-dir=${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-chunk-clean-interval 10m0s --cache-workers 1 --log-file ${LOGFILE} --allow-other --uid 1023 --gid 1023 --cache-chunk-no-memory ${READONLY} --daemon >> /dev/null 2>&1
+                
+                su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --log-file ${LOGFILE} --log-level ${LOGLEVEL} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-cache-mode ${CACHEMODE} --cache-chunk-no-memory --cache-chunk-size 1M --cache-chunk-total-size ${CACHEMAXSIZE} --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${DIRCACHETIME} --cache-info-age ${CACHEINFOAGE} --no-modtime --uid 0 --gid 1015 --allow-other --dir-perms 0775 --file-perms 0644 --umask 002 ${READONLY} --daemon & >> /dev/null 2>&1
 
                 sleep 5
                 done
