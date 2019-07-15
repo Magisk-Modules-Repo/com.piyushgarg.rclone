@@ -18,3 +18,10 @@
 * Add ability to disable a remote
 * Add a wrapper script for rclone
 * Make remount possible via `su --mount-master`
+
+## v1.5
+* Add arm/arm64 1.48 bins compiled using Termux
+* Support for mounting to SD
+* Squash missing rclone.conf install bug
+* Tune default parameters
+* Include a wrap for `rclone config`

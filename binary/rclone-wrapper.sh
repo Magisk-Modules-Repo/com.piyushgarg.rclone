@@ -50,6 +50,8 @@ unmount () {
 
     echo "Killing & Unmounting Remotes...."
     
+    echo
+    
     kill $(pgrep -f rclone| grep -v ${SCRIPTPID}) >> /dev/null 2>&1
     
     sleep 1
@@ -58,17 +60,16 @@ unmount () {
     
     umount -lf ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
     
-    #if [[ -e ${USER_CONFDIR}/.bindsd ]]; then
     
-        umount -lf ${RUNTIME_MNT_DEF}/ >> /dev/null 2>&1
+    umount -lf ${RUNTIME_MNT_DEF}/ >> /dev/null 2>&1
         
-        umount -lf ${RUNTIME_MNT_DEF} >> /dev/null 2>&1
+        
+    umount -lf ${RUNTIME_MNT_DEF} >> /dev/null 2>&1
     
-        su -M -c $HOME/rclone purge ${RUNTIME_MNT_DEF} >> /dev/null 2>&1
+    su -M -c $HOME/rclone purge ${RUNTIME_MNT_DEF} >> /dev/null 2>&1
     
-        su -M -c $HOME/rclone purge ${DATA_MNT} >> /dev/null 2>&1
+    su -M -c $HOME/rclone purge ${DATA_MNT} >> /dev/null 2>&1
     
-    #fi
     
     $HOME/rclone purge ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
 
@@ -95,6 +96,12 @@ elif [[ ${1} = unmount ]]; then
     
 elif [[ ${1} = config ]]; then
 
+    if [[ -e ${USER_CONFDIR}/rclone.conf ]]; then
+    
+        cp ${USER_CONFDIR}/rclone.conf ${HOME}/.config/rclone/rclone.conf
+    
+    fi
+     
      ${HOME}/rclone config && cp ${HOME}/.config/rclone/rclone.conf ${USER_CONFDIR}/rclone.conf && echo && ${HOME}/rclone-wrapper.sh remount
      
 elif [[ ${1} = help ]]; then

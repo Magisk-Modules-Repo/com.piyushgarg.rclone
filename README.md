@@ -120,6 +120,13 @@ For more detailed configuration of rclone please refer to [official documentatio
 * Add wrapper cmds to `rclone help`
 * Make remount possible without adb via `su -M -c`
 
+### v1.5
+* Add arm/arm64 1.48 bins compiled using Termux
+* Support for mounting to SD
+* Squash missing rclone.conf install bug
+* Tune default parameters
+* Include a wrap for `rclone config`
+
 </p> </details>
 
 <br>

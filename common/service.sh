@@ -168,17 +168,25 @@ if [[ ! -d ${CACHE} ]]; then
 
 fi
 
-chown root:sdcard_rw ${CACHE}
-chmod 0775 ${CACHE}
+if [[ -d ${CACHE} ]]; then
+
+    chown root:sdcard_rw ${CACHE}
+    chmod 0775 ${CACHE}
+
+fi
 
 if [[ ! -d ${CACHE_BACKEND} ]]; then
 
     mkdir -p ${CACHE_BACKEND}
 
 fi
-    
-chown root:sdcard_rw ${CACHE_BACKEND}
-chmod 0775 ${CACHE_BACKEND}
+
+if [[ -d ${CACHE_BACKEND} ]]; then
+
+    chown root:sdcard_rw ${CACHE_BACKEND}
+    chmod 0775 ${CACHE_BACKEND}
+
+fi
 
 if [[ ! -L ${RUNTIME_R}/cloud ]]; then
 
@@ -204,8 +212,12 @@ if [[ ! -d ${SD_BINDPOINT} ]] && [[ -e $USER_CONFDIR/.bindsd ]]; then
 
 fi
 
-chown root:sdcard_rw ${SD_BINDPOINT}
-chmod 0775 ${SD_BINDPOINT}
+if [[ -d ${SD_BINDPOINT} ]]; then
+
+    chown root:sdcard_rw ${SD_BINDPOINT}
+    chmod 0775 ${SD_BINDPOINT}
+
+fi
 
 if [[ -d ${RUNTIME_DEF} ]] && [[ ! -e ${SD_BINDPOINT}/.bound ]] && [[ -e $USER_CONFDIR/.bindsd ]]; then
 
@@ -291,13 +303,17 @@ ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
 
 echo
 
-/sbin/rclone serve http ${CLOUDROOTMOUNTPOINT} --addr ${HTTP_ADDR} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &
+if $(/sbin/rclone serve http ${CLOUDROOTMOUNTPOINT} --addr ${HTTP_ADDR} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &); then
 
-echo "Notice: /mnt/cloud served via HTTP at: http://${HTTP_ADDR}"
+    echo "Notice: /mnt/cloud served via HTTP at: http://${HTTP_ADDR}"
+    
+fi
 
-/sbin/rclone serve ftp ${CLOUDROOTMOUNTPOINT} --addr ${FTP_ADDR} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &
+if $(/sbin/rclone serve ftp ${CLOUDROOTMOUNTPOINT} --addr ${FTP_ADDR} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &); then
 
-echo "Notice: /mnt/cloud served via FTP at: ftp://${FTP_ADDR}"
+    echo "Notice: /mnt/cloud served via FTP at: ftp://${FTP_ADDR}"
+
+fi
 
 echo
 echo "...done"
