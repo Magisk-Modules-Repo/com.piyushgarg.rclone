@@ -1,7 +1,7 @@
 id=com.piyushgarg.rclone
 name=rclone-mount
 modVer=1.5
-BinVer=1.47
+BinVer=1.48
 version=rclone: (v1.47.0) mod: (v1.5) 
 versionCode=105
 author=piyushgarg @ github.com

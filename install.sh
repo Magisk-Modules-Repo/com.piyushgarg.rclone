@@ -181,6 +181,7 @@ set_permissions() {
   ui_print "+ Attempting to mount your [Remotes]:"
   ui_print "+ please wait..."
   ui_print ""
+  export INTERACTIVE=1
   $MODPATH/rclone-wrapper.sh remount
   # Here are some examples:
   # set_perm_recursive  $MODPATH/system/lib       0     0       0755      0644
