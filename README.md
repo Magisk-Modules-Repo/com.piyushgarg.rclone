@@ -47,7 +47,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 
 - Specification of rclone parameters on a per remote basis can be created in 
 
-    `/sdcard/.rclone/.*.param`
+    `/sdcard/.rclone/.*.param`- 
 
    Where `*` is replace with name of remote
 
@@ -58,6 +58,8 @@ For more detailed configuration of rclone please refer to [official documentatio
         BUFFERSIZE=0
 
         CACHEMAXSIZE=256M
+
+        CACHEINFOAGE=1s
 
         DIRCACHETIME=1s
 
@@ -71,10 +73,34 @@ For more detailed configuration of rclone please refer to [official documentatio
 
         READONLY=0
 
-    **NOTE:** _There is no need to specify values you do not wish to change._
+    **NOTE:** _There is no need to specify values you do not wish to change. The above are defaults for all remotes._
   </p> </details>
 
    For for information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)
+
+---
+## Custom Globals
+
+- Specification of global rclone parameters can be created as files in 
+
+      /sdcard/.rclone/`.*
+
+   Where `*` represents the global parm you wish to set
+
+      .bindsd
+
+      .nocache
+ 
+      .mincache
+
+      .writecache
+
+      .fullcache
+
+      .disable
+
+   **NOTE:** _Global parameters effect all remotes without `.*.parm` files specifying the changed parameters._
+  </p> </details>
 
 ---
 ## Known Issues
@@ -92,7 +118,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 ---
 ## Disclaimer
 
-Neither the author nor developer's will be held responsible for any damage/data loss that may occur during use of this module. While we have done our best to make sure no harm will come about, no guarantees can be made. Keep in mind the binaries included in this project were originally intended to be ran on PCs which may cause unforseen issues. 
+Neither the author nor developer's will be held responsible for any damage/data loss that may occur during use of this module. While we have done our best to make sure no harm will come about, no guarantees can be made. Keep in mind the binaries included in this project were originally intended to be ran on PCs which may cause unforseen issues.
 
 ---
 ## Credits
