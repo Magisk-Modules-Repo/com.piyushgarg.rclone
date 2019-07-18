@@ -5,7 +5,8 @@ Mount cloud storage locally via rclone & fusermount directly on your Android pow
 
 Now you can have virtually limitless storage expansion with support for dozens of cloud providers. Extremely useful for devices without physical storage expansion capabilities & streaming large media files without need for full caching. Binaries obtained directly from rclone.org. 
 
----
+We are constantly looking to improve this project, if you experience any issues or have suggestions please file them  [HERE](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues).
+
 ## Features
 
 - Support for arm, arm64, & x86
@@ -14,11 +15,7 @@ Now you can have virtually limitless storage expansion with support for dozens o
 
 - Apps with ability to specify paths can access /mnt/cloud
 
-- Most file explorers work just fine
-
-- mpv (playstore) is best for playing audio and video files. Fast browsing and quick playing.
-
-- Default dir caching set to 24h
+- Most file explorers work just fine ([issue #9](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/9))
 
 - Executed mount scripts through other applications will be seen only by that application.
 
@@ -26,24 +23,26 @@ Now you can have virtually limitless storage expansion with support for dozens o
 
 - Specify custom rclone params for each remote via `/sdcard/.rclone/.REMOTENAME.param`
 
-- Access remotes via http://127.0.0.1:38762
+- Access remotes via [http://127.0.0.1:38762](http://127.0.0.1:38762)
 
-- Access remotes via ftp://127.0.0.1:38763
+- Access remotes via [ftp://127.0.0.1:38763](ftp://127.0.0.1:38763)
 
+- Mount bind to `/sdcard` (see [ issue #5](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/5))
 
+---
+## Configuration (pre-installing)
 
-## Configuration (post-installing)
+1. Copy your `rclone.conf` file to `/sdcard/.rclone/rclone.conf`
 
-1. Copy your rclone.conf file to `/sdcard/.rclone/rclone.conf`
+2. Add custom params at `/sdcard/.rclone/.*.param` (if needed)
 
-2. Add custom params at `/sdcard/.rclone/.*.params` (if needed)
+3. Install the module via Magisk Manager
 
-3. Reboot or run `rclone remount` from terminal
-
-4. All your rclone mount points will show up under `/mnt/cloud/` & `/storage/cloud`
+4. All your rclone mount points will show up under `/mnt/cloud/` & `/storage/cloud` or `/sdcard/cloud`
 
 For more detailed configuration of rclone please refer to [official documentation](https://rclone.org)
 
+---
 ## Custom Params
 
 - Specification of rclone parameters on a per remote basis can be created in 
@@ -56,36 +55,46 @@ For more detailed configuration of rclone please refer to [official documentatio
 
   <details><summary> SHOW ME </summary> <p>
 
-        BUFFERSIZE=8M
+        BUFFERSIZE=0
 
         CACHEMAXSIZE=256M
 
-        DIRCACHETIME=24h
+        DIRCACHETIME=1s
 
-        READAHEAD=128k
+        ATTRTIMEOUT=1s
+
+        READAHEAD=1s
 
         CACHEMODE=writes
 
+        DISABLE=0
 
-   **NOTE:** _There is no need to specify values you do not wish to change._
+        READONLY=0
+
+    **NOTE:** _There is no need to specify values you do not wish to change._
   </p> </details>
 
    For for information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)
 
+---
 ## Known Issues
 
 - VLC  takes a long time to load media as it opens file in write mode when using it's internal browser. 
 
    -Create remote type alias for media dirs in rclone.conf and specify `CACHEMODE=off` in `/sdcard/.rclone/.ALIASNAME.param`
 
-- Mount point can not be placed in `/sdcard/`
-
-- Can not mount remotes until device is unlocked 
+- Encrypted devices can not mount until unlock
 
 - Encrypted `rclone.conf` causes reboots
 
-- Not responsilbe for any loss.
+- High cpu/mem in some apps with storage perms ([issue #9](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/9))
 
+---
+## Disclaimer
+
+Neither the author nor developer's will be held responsible for any damage/data loss that may occur during use of this module. While we have done our best to make sure no harm will come about, no guarantees can be made. Keep in mind the binaries included in this project were originally intended to be ran on PCs which may cause unforseen issues. 
+
+---
 ## Credits
 
 - rclone devs
@@ -93,6 +102,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 - rclone binaries from [rclone.org](https://rclone.org/downloads)
 - fusermount binaries from  [xda-devs](https://forum.xda-developers.com/android/development/fusermount-android-rclone-mount-t3866652)
 
+---
 ## Changelog
 <details><summary>CLICK HERE</summary> <p>
 
@@ -111,14 +121,13 @@ For more detailed configuration of rclone please refer to [official documentatio
 * Control global `--vfs-cache-mode` via simple files placed in `/sdcard/.rclone/`
 * Specify custom params for individual remotes via `/sdcard/.rclone/.REMOTENAME.params`
 
- 
 ### v1.4
 * Add ability to disable a remote 
 * Add a wrapper script for rclone
 * Access remotes via http & ftp
 * Use without rebooting device
 * Add wrapper cmds to `rclone help`
-* Make remount possible without adb via `su -M -c`
+* Make remount possible via `su -M -c`
 
 ### v1.5
 * Add arm/arm64 1.48 bins compiled using Termux
@@ -126,10 +135,8 @@ For more detailed configuration of rclone please refer to [official documentatio
 * Squash missing rclone.conf install bug
 * Tune default parameters
 * Include a wrap for `rclone config`
-
+* General Improvements
 </p> </details>
-
-<br>
+<br></br>
 
 [![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
-</br>
