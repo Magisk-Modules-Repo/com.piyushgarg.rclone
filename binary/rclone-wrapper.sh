@@ -14,6 +14,8 @@ DATA_MNT=/data/media/0/cloud
 
 SCRIPTPID=$$
 
+export INTERACTIVE=1
+
 if [ -e ${UPDDIR}/${id}/rclone ]; then
 
     HOME=${UPDDIR}/${id}
@@ -27,6 +29,24 @@ else
     HOME=${MODDIR}
 
 fi
+
+config () {
+    
+    if [[ ! -d ${USER_CONFDIR} ]]; then 
+
+    mkdir ${USER_CONFDIR}
+
+    fi
+    
+    if [[ -e ${USER_CONFDIR}/rclone.conf ]]; then
+    
+        cp ${USER_CONFDIR}/rclone.conf ${HOME}/.config/rclone/rclone.conf
+    
+    fi
+     
+    ${HOME}/rclone config && cp ${HOME}/.config/rclone/rclone.conf ${USER_CONFDIR}/rclone.conf && echo && ${HOME}/rclone-wrapper.sh remount
+
+}
 
 help () { 
 
@@ -96,15 +116,13 @@ elif [[ ${1} = unmount ]]; then
     
 elif [[ ${1} = config ]]; then
 
-    if [[ -e ${USER_CONFDIR}/rclone.conf ]]; then
-    
-        cp ${USER_CONFDIR}/rclone.conf ${HOME}/.config/rclone/rclone.conf
-    
-    fi
-     
-     ${HOME}/rclone config && cp ${HOME}/.config/rclone/rclone.conf ${USER_CONFDIR}/rclone.conf && echo && ${HOME}/rclone-wrapper.sh remount
+    config
      
 elif [[ ${1} = help ]]; then
+
+    help
+    
+elif [[ ${1} = --help ]]; then
 
     help
 

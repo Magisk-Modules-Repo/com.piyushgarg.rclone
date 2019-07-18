@@ -15,21 +15,18 @@ if [ -e ${UPDDIR}/${id}/rclone-wrapper.sh ]; then
 
     ln -sf ${UPDDIR}/${id}/rclone-wrapper.sh /sbin/rclone
     ln -sf ${UPDDIR}/${id}/fusermount /sbin/fusermount
-    ln -sf ${UPDDIR}/${id}/rclone-mount /sbin/rclone-mount
     HOME=${UPDDIR}/${id}
 
 elif [ -e ${IMGDIR}/${id}/rclone-wrapper.sh ]; then
 
     ln -sf ${IMGDIR}/${id}/rclone-wrapper.sh /sbin/rclone
     ln -sf ${IMGDIR}/${id}/fusermount /sbin/fusermount
-    ln -sf ${IMGDIR}/${id}/rclone-mount /sbin/rclone-mount
     HOME=${IMGDIR}/${id}
 
 else
 
     ln -sf ${MODDIR}/rclone-wrapper.sh /sbin/rclone
     ln -sf ${MODDIR}/fusermount /sbin/fusermount
-    ln -sf ${MODDIR}/rclone-mount /sbin/rclone-mount
     HOME=${MODDIR}
 
 fi
@@ -49,10 +46,10 @@ CLOUDROOTMOUNTPOINT=/mnt/cloud
 #RCLONE PARAMETERS
 DISABLE=0
 BUFFERSIZE=0
-CACHEMAXSIZE=5M
-DIRCACHETIME=1h
-ATTRTIMEOUT=1h
-CACHEINFOAGE=1h
+CACHEMAXSIZE=128M
+DIRCACHETIME=1s
+ATTRTIMEOUT=1s
+CACHEINFOAGE=1s
 READAHEAD=64k
 CACHEMODE=off
 CACHE=${USER_CONFDIR}/.cache
@@ -75,7 +72,7 @@ fi
 
 custom_params () {
 
-    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME READAHEAD CACHEMODE DISABLE READONLY"
+    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME ATTRTIMEOUT CACHEINFOAGE READAHEAD CACHEMODE DISABLE READONLY"
 
     BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
 
@@ -108,7 +105,6 @@ custom_params () {
 
     fi
 
-
 }
 
 NET_CHK() {
@@ -135,6 +131,12 @@ sleep 5
 if [[ ${COUNT} -eq 240 ]] || [[ ! -d /sdcard/Android ]]; then
 
     exit 0
+
+fi
+
+if [[ ! -d ${USER_CONFDIR} ]]; then 
+
+    mkdir ${USER_CONFDIR}
 
 fi
 
@@ -296,7 +298,7 @@ ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
                 
                 mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
                 
-                su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --log-file ${LOGFILE} --log-level ${LOGLEVEL} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-cache-mode ${CACHEMODE} --cache-chunk-no-memory --cache-chunk-size 1M --cache-chunk-total-size ${CACHEMAXSIZE} --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${DIRCACHETIME} --cache-info-age ${CACHEINFOAGE} --no-modtime --uid 0 --gid 1015 --allow-other --dir-perms 0775 --file-perms 0644 --umask 002 ${READONLY} --daemon & >> /dev/null 2>&1
+                su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --log-file ${LOGFILE} --log-level ${LOGLEVEL} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-cache-mode ${CACHEMODE} --cache-chunk-no-memory --cache-chunk-size 1M --cache-chunk-total-size ${CACHEMAXSIZE} --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${DIRCACHETIME} --cache-info-age ${CACHEINFOAGE} --use-server-modtime --no-modtime --no-checksum --uid 0 --gid 1015 --allow-other --dir-perms 0775 --file-perms 0644 --umask 002 ${READONLY} --daemon & >> /dev/null 2>&1
 
                 sleep 5
                 done
