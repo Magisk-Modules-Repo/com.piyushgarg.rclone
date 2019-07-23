@@ -49,7 +49,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 
 - Specification of rclone parameters on a per remote basis can be created in 
 
-    `/sdcard/.rclone/.*.param`- 
+    `/sdcard/.rclone/.*.param`
 
    Where `*` is replace with name of remote
 
@@ -80,7 +80,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 
 - Specification of global rclone parameters can be created as files in 
 
-      /sdcard/.rclone/`.*
+      /sdcard/.rclone/.*
 
    _Where `*` represents the global parm you wish to set_
 
