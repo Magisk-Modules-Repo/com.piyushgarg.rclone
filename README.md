@@ -47,7 +47,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 
 - Specification of rclone parameters on a per remote basis can be created in 
 
-    `/sdcard/.rclone/.*.param`
+    /sdcard/.rclone/.*.param
 
    Where `*` is replaced with name of remote
 
@@ -86,6 +86,8 @@ For more detailed configuration of rclone please refer to [official documentatio
 
    _Where `*` represents the global parm you wish to set_
 
+- Global Parameters
+
         .bindsd
 
         .nocache
@@ -123,7 +125,8 @@ Neither the author nor developer's will be held responsible for any damage/data 
 ## Credits
 
 - rclone devs
-- pmj_pedro@xda
+- pmj_pedro[@xda](https://forum.xda-developers.com/showpost.php?p=78147335&postcount=1)
+- agnostic-apollo[@xda](https://forum.xda-developers.com/showpost.php?p=79929083&postcount=12)
 - rclone binaries from [rclone.org](https://rclone.org/downloads)
 - fusermount binaries from  [xda-devs](https://forum.xda-developers.com/android/development/fusermount-android-rclone-mount-t3866652)
 - improvements geofferey@github
@@ -155,12 +158,14 @@ Neither the author nor developer's will be held responsible for any damage/data 
 * Make remount possible via `su -M -c`
 
 ### v1.5
-* Add arm/arm64 1.48 bins compiled using Termux
-* Add static arm64 `fusermount`
+* Replace arm/arm64  `rclone` 1.48 bins built with Termux
+* Replace arm/arm64 `fusermount` built with Termux
+*  Add arm/arm64 `libandroid-support.so` from Termux
 * Support for mounting to SD
 * Squash missing rclone.conf install bug
 * Tune default parameters
 * Include a wrap for `rclone config`
+* Include `fusermount-wrapper.sh`
 * General Improvements
 
 [![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
