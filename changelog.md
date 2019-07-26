@@ -21,6 +21,7 @@
 
 ## v1.5
 * Add arm/arm64 1.48 bins compiled using Termux
+* Add static arm64 `fusermount`
 * Support for mounting to SD
 * Squash missing rclone.conf install bug
 * Tune default parameters
