@@ -175,6 +175,7 @@ set_permissions() {
   set_perm_recursive $MODPATH 0 0 0755 0644
   set_perm $MODPATH/rclone 0 0 0755
   set_perm $MODPATH/fusermount 0 0 0755
+  set_perm $MODPATH/fusermount-wrapper.sh 0 0 0755
   set_perm $MODPATH/service.sh 0 0 0500
   set_perm $MODPATH/rclone-wrapper.sh 0 0 0500
   ln -sf $MODPATH/rclone-wrapper.sh /sbin/rclone
@@ -183,7 +184,7 @@ set_permissions() {
   ui_print "+ please wait..."
   ui_print ""
   
-    if [[ -e /sdcard/.rclone.conf ]]; then
+    if [[ -e /sdcard/.rclone/rclone.conf ]]; then
       
         export INTERACTIVE=1
         $MODPATH/rclone-wrapper.sh remount
@@ -191,6 +192,8 @@ set_permissions() {
     else 
     
         echo "'/sdcard/.rclone/rclone.conf' not found"
+        echo
+        echo "Additional setup required..."
         echo "Please run rclone config in su terminal"
       
     fi
