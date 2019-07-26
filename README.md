@@ -9,15 +9,13 @@ We are constantly striving to improve this project & make it the best. If you ex
 
 ## Features
 
-- Support for arm, arm64, & x86
+- Support for arm, arm64, ~~& x86~~
 
 - Huge list of supported cloud storage providers
 
 - Apps with ability to specify paths can access /mnt/cloud
 
 - Most file explorers work just fine ([issue #9](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/9))
-
-- Executed mount scripts through other applications will be seen only by that application.
 
 - Mount points use names of remote(s) in rclone.conf
 
@@ -51,27 +49,31 @@ For more detailed configuration of rclone please refer to [official documentatio
 
     `/sdcard/.rclone/.*.param`
 
-   Where `*` is replace with name of remote
+   Where `*` is replaced with name of remote
 
 - Parameters and their default values:
 
         BUFFERSIZE=0
 
-        CACHEMAXSIZE=256M
+        CACHEMAXSIZE=1G
 
-        CACHEINFOAGE=2s
+        CACHEINFOAGE=30m
 
-        DIRCACHETIME=1s
+        DIRCACHETIME=1h
 
-        ATTRTIMEOUT=1s
+        ATTRTIMEOUT=30s
 
-        READAHEAD=1s
+        READAHEAD=128k
 
-        CACHEMODE=writes
+        CACHEMODE=off
 
         DISABLE=0
 
         READONLY=0
+
+        BINDSD=0
+
+        BINDPOINT=
 
     **NOTE:** _There is no need to specify values you do not wish to change. The above are defaults for all remotes. For more information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)_
 
@@ -84,20 +86,19 @@ For more detailed configuration of rclone please refer to [official documentatio
 
    _Where `*` represents the global parm you wish to set_
 
-       .bindsd
+        .bindsd
 
-       .nocache
+        .nocache
  
-       .mincache
+        .mincache
 
-       .writecache
+        .writecache
 
-       .fullcache
+        .fullcache
 
-       .disable
+        .disable
 
-   **NOTE:** _Global parameters effect all remotes without `.*.parm` files specifying the changed parameters._
-  </p> </details>
+   **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values._
 
 ---
 ## Known Issues
