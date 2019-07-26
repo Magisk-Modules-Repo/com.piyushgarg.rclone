@@ -157,8 +157,12 @@ on_install() {
   unzip -p "$ZIPFILE" binary/rclone-${ARCH} > $MODPATH/rclone
   ui_print "+ Extracting fusermount-$ARCH to $MODPATH/fusermount"
   unzip -p "$ZIPFILE" binary/fusermount-${ARCH} > $MODPATH/fusermount
-  ui_print "+ Extracting rclone-wrapper.sh script to $MODPATH/rclone-mount"
+  ui_print "+ Extracting lib-${ARCH}/libandroid-support.so to $MODPATH/libandroid-support.so"
+  unzip -p "$ZIPFILE" lib-${ARCH}/libandroid-support.so > $MODPATH/libandroid-support.so
+  ui_print "+ Extracting rclone-wrapper.sh script to $MODPATH/rclone-wrapper.sh"
   unzip -p "$ZIPFILE" binary/rclone-wrapper.sh > $MODPATH/rclone-wrapper.sh
+  ui_print "+ Extracting fusermount-wrapper.sh script to $MODPATH/fusermount-wrapper.sh"
+  unzip -p "$ZIPFILE" binary/fusermount-wrapper.sh > $MODPATH/fusermount-wrapper.sh
 }
 
 # Only some special files require specific permissions
