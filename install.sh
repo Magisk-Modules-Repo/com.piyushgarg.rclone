@@ -128,7 +128,7 @@ print_modname() {
   ui_print "*        Magisk Module        *"
   ui_print "*       by: piyushgarg        *"
   ui_print "*******************************"
-  ui_print "*rclone: (v1.47.0) mod: (v1.4)*"
+  ui_print "*rclone: (v1.48.0) mod: (v1.5)*"
   ui_print "*******************************"
 }
 
@@ -157,10 +157,12 @@ on_install() {
   unzip -p "$ZIPFILE" binary/rclone-${ARCH} > $MODPATH/rclone
   ui_print "+ Extracting fusermount-$ARCH to $MODPATH/fusermount"
   unzip -p "$ZIPFILE" binary/fusermount-${ARCH} > $MODPATH/fusermount
-  ui_print "+ Extracting rclone-mount script to $MODPATH/rclone-mount"
-  unzip -p "$ZIPFILE" binary/rclone-mount > $MODPATH/rclone-mount
-  ui_print "+ Extracting rclone-wrapper.sh script to $MODPATH/rclone-mount"
+  ui_print "+ Extracting lib-${ARCH}/libandroid-support.so to $MODPATH/libandroid-support.so"
+  unzip -p "$ZIPFILE" lib-${ARCH}/libandroid-support.so > $MODPATH/libandroid-support.so
+  ui_print "+ Extracting rclone-wrapper.sh script to $MODPATH/rclone-wrapper.sh"
   unzip -p "$ZIPFILE" binary/rclone-wrapper.sh > $MODPATH/rclone-wrapper.sh
+  ui_print "+ Extracting fusermount-wrapper.sh script to $MODPATH/fusermount-wrapper.sh"
+  unzip -p "$ZIPFILE" binary/fusermount-wrapper.sh > $MODPATH/fusermount-wrapper.sh
 }
 
 # Only some special files require specific permissions
@@ -173,7 +175,7 @@ set_permissions() {
   set_perm_recursive $MODPATH 0 0 0755 0644
   set_perm $MODPATH/rclone 0 0 0755
   set_perm $MODPATH/fusermount 0 0 0755
-  set_perm $MODPATH/rclone-mount 0 0 0755
+  set_perm $MODPATH/fusermount-wrapper.sh 0 0 0755
   set_perm $MODPATH/service.sh 0 0 0500
   set_perm $MODPATH/rclone-wrapper.sh 0 0 0500
   ln -sf $MODPATH/rclone-wrapper.sh /sbin/rclone
@@ -181,7 +183,21 @@ set_permissions() {
   ui_print "+ Attempting to mount your [Remotes]:"
   ui_print "+ please wait..."
   ui_print ""
-  $MODPATH/rclone-wrapper.sh remount
+  
+    if [[ -e /sdcard/.rclone/rclone.conf ]]; then
+      
+        export INTERACTIVE=1
+        $MODPATH/rclone-wrapper.sh remount
+        
+    else 
+    
+        echo "'/sdcard/.rclone/rclone.conf' not found"
+        echo
+        echo "Additional setup required..."
+        echo "Please run rclone config in su terminal"
+      
+    fi
+  
   # Here are some examples:
   # set_perm_recursive  $MODPATH/system/lib       0     0       0755      0644
   # set_perm  $MODPATH/system/bin/app_process32   0     2000    0755      u:object_r:zygote_exec:s0
