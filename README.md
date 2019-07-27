@@ -1,11 +1,11 @@
-## rclone-mount for Android
+## Rclone Remount for Android
 ---
 
-Mount cloud storage locally via rclone & fusermount directly on your Android powered smart device. 
+Remount cloud storage locally via rclone & fusermount directly on your Android powered smart device. 
 
-Now you can have virtually limitless storage expansion with support for dozens of cloud providers. Extremely useful for devices without physical storage expansion capabilities. Also great for streaming large media files without need for full caching. Binaries obtained directly from rclone.org. 
+Virtually limitless storage expansion with support for dozens of cloud providers including Dropbox, GDrive, OneDrive, SFTP & many more. Extremely useful for devices without physical storage expansion capabilities. Also great for streaming large media files without need for full caching. Binaries obtained directly from rclone.org. 
 
-We are constantly striving to improve this project & make it the best. If you experience any issues or have suggestions please file them  [HERE](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues).
+We are constantly striving to improve this project & make it the best. If you experience any issues or have suggestions please file them  [HERE](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues). Contributions to this project are welcomed. 
 
 ## Features
 
@@ -13,19 +13,19 @@ We are constantly striving to improve this project & make it the best. If you ex
 
 - Huge list of supported cloud storage providers
 
-- Apps with ability to specify paths can access /mnt/cloud
+- Apps with ability to specify paths can access `/mnt/cloud/`
 
 - Most file explorers work just fine ([issue #9](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/9))
 
 - Mount points use names of remote(s) in rclone.conf
 
-- Specify custom rclone params for each remote via `/sdcard/.rclone/.REMOTENAME.param`
+- Specify custom rclone params for each remote via `/sdcard/.rclone/.REMOTE.param`
 
 - Access remotes via [http://127.0.0.1:38762](http://127.0.0.1:38762)
 
 - Access remotes via [ftp://127.0.0.1:38763](ftp://127.0.0.1:38763)
 
-- Mount bind to `/sdcard` (see [ issue #5](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/5))
+- Mount bind to `/sdcard/` (see [ issue #5](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/5))
 
 ---
 ## Configuration (pre-installing)
@@ -36,16 +36,16 @@ We are constantly striving to improve this project & make it the best. If you ex
 
 3. Install the module via Magisk Manager
 
-4. Run `rclone config` if additional setup required 
+4. Run `rclone config` via term if additional setup required 
 
-4. All your rclone mount points will show up under `/mnt/cloud/` & `/storage/cloud` or `/sdcard/cloud`
+4. All your rclone mount points will show up under `/mnt/cloud/` & `/storage/cloud/` or `/sdcard/cloud/`
 
 For more detailed configuration of rclone please refer to [official documentation](https://rclone.org)
 
 ---
 ## Custom Params
 
-- Specification of rclone parameters on a per remote basis can be created in 
+- Specification of rclone parameters on a per remote basis can be created inside hidden files ending with the `.param` extension
 
       /sdcard/.rclone/.*.param
 
@@ -80,7 +80,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 ---
 ## Custom Globals
 
-- Specification of global rclone parameters can be created as files in 
+- Specification of global rclone parameters can be created as hidden files in 
 
       /sdcard/.rclone/.*
 
