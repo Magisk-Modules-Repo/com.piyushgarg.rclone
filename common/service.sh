@@ -154,38 +154,64 @@ sd_unbind () {
 }
 
 sd_binder () {
-    
+
     if [[ -d ${RUNTIME_D} ]] && [[ ${BINDSD} = 1 ]] || [[ -e ${USER_CONFDIR}.bindsd ]]; then
-    
+
         if [[ -z ${BINDPOINT} ]]; then 
 
             mkdir -p ${DATA_MEDIA}/Cloud/${remote}
             chown media_rw:media_rw ${DATA_MEDIA}/Cloud/$remote
-            
+
+            BINDPOINT=${BINDPOINT_D}/${remote}
+
+            su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
+
+            BINDPOINT=${BINDPOINT_R}/${remote}
+
+            if ! mount |grep -q ${BINDPOINT}; then
+
+                su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
+
+            fi
+
+            BINDPOINT=${BINDPOINT_W}/${remote}
+
+            if ! mount |grep -q ${BINDPOINT}; then
+
+            su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
+
+            fi
+
         else 
-        
+
             mkdir ${DATA_MEDIA}/${BINDPOINT} >> /dev/null 2>&1
             chown media_rw:media_rw ${DATA_MEDIA}/${BINDPOINT}
 
+            USER_BINDPOINT=${BINDPOINT}
+            BINDPOINT=${RUNTIME_D}/emulated/0/${USER_BINDPOINT}
+
+            su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
+
+            BINDPOINT=${RUNTIME_R}/emulated/0/${USER_BINDPOINT}
+
+            if ! mount |grep -q ${BINDPOINT}; then
+
+                su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
+
+            fi
+
+            BINDPOINT=${RUNTIME_W}/emulated/0/${USER_BINDPOINT}
+
+            if ! mount |grep -q ${BINDPOINT}; then
+
+                su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
+
+            fi
+
         fi
-
-        if [[ -z ${BINDPOINT} ]]; then
-
-            BINDPOINT=${BINDPOINT_DEF}/${remote}
-    su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} #>> /dev/null 2>&1
-        else 
-            
-           # USER_BINDPOINT=${BINDPOINT}
-            BINDPOINT=${RUNTIME_D}/emulated/0/${BINDPOINT}
-    
-        fi
-
-    su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
 
     fi
-    
-   # su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} #>> /dev/null 2>&1
-    
+
     unset BINDPOINT
 
 }
