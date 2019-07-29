@@ -60,6 +60,7 @@ CACHE=${USER_CONFDIR}/.cache
 CACHE_BACKEND=${USER_CONFDIR}/.cache-backend
 HTTP_ADDR=127.0.0.1:38762
 FTP_ADDR=127.0.0.1:38763
+NETCHK_ADDR=google.com
 
 if [[ -z ${INTERACTIVE} ]]; then
 
@@ -76,7 +77,7 @@ fi
 
 custom_params () {
 
-    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME ATTRTIMEOUT CACHEINFOAGE READAHEAD CACHEMODE DISABLE READONLY BINDSD BINDPOINT"
+    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME ATTRTIMEOUT CACHEINFOAGE READAHEAD CACHEMODE DISABLE READONLY BINDSD BINDPOINT NETCHK_ADDR"
 
     BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
 
@@ -111,9 +112,14 @@ custom_params () {
 
 }
 
+remote=global
+custom_params
+unset remote
+echo
+
 NET_CHK() {
 
-   ping -c 5 google.com
+   ping -c 5 ${NETCHK_ADDR}
 
 }
 
@@ -216,6 +222,28 @@ sd_binder () {
 
 }
 
+rclone_mount () {
+
+    if [[ ${READONLY} = 1 ]]; then
+
+        READONLY=" --read-only "
+
+    else
+
+        READONLY=" "
+
+    fi
+
+    echo "[${remote}] available at: -> [${CLOUDROOTMOUNTPOINT}/${remote}]"
+
+    mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
+
+    su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --log-file ${LOGFILE} --log-level ${LOGLEVEL} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-cache-mode ${CACHEMODE} --cache-chunk-no-memory --cache-chunk-size 1M --cache-chunk-total-size ${CACHEMAXSIZE} --cache-workers 1 --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${DIRCACHETIME} --cache-info-age ${CACHEINFOAGE} --no-modtime --no-checksum --uid 0 --gid 1015 --allow-other --dir-perms 0775 --file-perms 0644 --umask 002 ${READONLY} --daemon & >> /dev/null 2>&1
+
+    sleep 5
+
+}
+
 COUNT=0
 
 if [[ ${INTERACTIVE} = 0 ]]; then
@@ -253,12 +281,6 @@ fi
 if [[ -e ${USER_CONFDIR}/.disable ]]; then 
 
     exit 0
-
-fi
-
-if [[ -e ${USER_CONFDIR}/.bindsd ]]; then 
-
-    BINDSD=1
 
 fi
 
@@ -333,30 +355,6 @@ if [[ -e ${USER_CONF} ]]; then
 
 fi
 
-if [[ -e ${USER_CONFDIR}/.nocache ]]; then
-
-    CACHEMODE=off
-
-fi
-
-if [[ -e ${USER_CONFDIR}/.mincache ]]; then
-
-    CACHEMODE=minimal
-
-fi
-
-if [[ -e $USER_CONFDIR/.writecache ]]; then
-
-    CACHEMODE=writes
-
-fi
-
-if [[ -e $USER_CONFDIR/.fullcache ]]; then
-
-    CACHEMODE=full
-
-fi
-
 until NET_CHK || [[ ${COUNT} = 60 ]]; do 
 
     sleep 5
@@ -366,45 +364,29 @@ done >> /dev/null 2>&1
 
 echo "Default CACHEMODE ${CACHEMODE}"
 
-${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
+${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: | 
 
-        while read remote; do
+    while read remote; do
 
-                echo
+        echo
 
-                DISABLE=0
-                READONLY=0
+        DISABLE=0
+        READONLY=0
 
-                custom_params
-                sd_unbind
+        custom_params
 
-                if [[ ${DISABLE} = 1 ]] || [[ -e ${USER_CONFDIR}/.${remote}.disable ]]; then
+        if [[ ${DISABLE} = 1 ]] || [[ -e ${USER_CONFDIR}/.${remote}.disable ]]; then
 
-                    echo "${remote} disabled by user"
-                    continue
+            echo "${remote} disabled by user"
+            continue
 
-                fi
+        fi
 
-                if [[ ${READONLY} = 1 ]]; then
+        sd_unbind
+        rclone_mount
+        sd_binder
 
-                     READONLY=" --read-only "
-
-                else
-
-                     READONLY=" "
-                fi
-
-                echo "[${remote}] available at: -> [${CLOUDROOTMOUNTPOINT}/${remote}]"
-
-                mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
-                
-                su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --log-file ${LOGFILE} --log-level ${LOGLEVEL} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-cache-mode ${CACHEMODE} --cache-chunk-no-memory --cache-chunk-size 1M --cache-chunk-total-size ${CACHEMAXSIZE} --cache-workers 1 --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${DIRCACHETIME} --cache-info-age ${CACHEINFOAGE} --no-modtime --no-checksum --uid 0 --gid 1015 --allow-other --dir-perms 0775 --file-perms 0644 --umask 002 ${READONLY} --daemon & >> /dev/null 2>&1
-
-                sleep 5
-
-                sd_binder
-
-                done
+    done
 
 echo
 
