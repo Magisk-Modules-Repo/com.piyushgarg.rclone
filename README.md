@@ -75,6 +75,8 @@ Specification of rclone parameters on a per remote basis can be created inside h
 
         BINDPOINT=
 
+        ADD_PARAMS=
+
     **NOTE:** _There is no need to specify values you do not wish to change. The above are defaults for all remotes. For more information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)_
 
 ---
@@ -92,7 +94,7 @@ Specification of global rclone parameters can be created in
 
         BINDPOINT=
 
-   **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values. Some parameters are specific to globals while others are excluded_
+   **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values. Some parameters are specific to globals while others have been excluded_
 
 ---
 ## Known Issues
@@ -162,6 +164,7 @@ Neither the author nor developer's will be held responsible for any damage/data 
 
 ### v1.6
 * Simplify custom global parameters
-* Improve binding to SD
+* Fix & improve binding to SD
+* Specify additional  rclone ops with `ADD_PARAMS=`
 
 [![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
