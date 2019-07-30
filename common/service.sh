@@ -77,7 +77,7 @@ fi
 
 custom_params () {
 
-    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME ATTRTIMEOUT CACHEINFOAGE READAHEAD CACHEMODE DISABLE READONLY BINDSD BINDPOINT NETCHK_ADDR"
+    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME ATTRTIMEOUT CACHEINFOAGE READAHEAD CACHEMODE DISABLE READONLY BINDSD BINDPOINT NETCHK_ADDR ADD_PARAMS"
 
     BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
 
@@ -95,7 +95,12 @@ custom_params () {
 
                     if [[ "$(echo "${VAR}" |grep -w "$PARAM")" ]]; then
                         echo "Importing ${VAR}"
-                        eval $(echo "${VAR}" |cut -d ' ' -f 1)
+                        VALUE="$(echo ${VAR} |cut -d '=' -f2)"
+
+                        VALUE=\"${VALUE}\"
+
+                        eval $(echo "${PARAM}""=""${VALUE}")
+
                     fi
 
                 done < $USER_CONFDIR/.$remote.param
@@ -234,11 +239,21 @@ rclone_mount () {
 
     fi
 
+    if [[ -z ${ADD_PARAMS} ]]; then
+
+        ADD_PARAMS=" "
+        
+    else
+    
+        ADD_PARAMS=" ${ADD_PARAMS} "
+
+    fi
+
     echo "[${remote}] available at: -> [${CLOUDROOTMOUNTPOINT}/${remote}]"
 
     mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
 
-    su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --log-file ${LOGFILE} --log-level ${LOGLEVEL} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-cache-mode ${CACHEMODE} --cache-chunk-no-memory --cache-chunk-size 1M --cache-chunk-total-size ${CACHEMAXSIZE} --cache-workers 1 --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${DIRCACHETIME} --cache-info-age ${CACHEINFOAGE} --no-modtime --no-checksum --uid 0 --gid 1015 --allow-other --dir-perms 0775 --file-perms 0644 --umask 002 ${READONLY} --daemon & >> /dev/null 2>&1
+    su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --log-file ${LOGFILE} --log-level ${LOGLEVEL} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-cache-mode ${CACHEMODE} --cache-chunk-no-memory --cache-chunk-size 1M --cache-chunk-total-size ${CACHEMAXSIZE} --cache-workers 1 --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${DIRCACHETIME} --cache-info-age ${CACHEINFOAGE} --no-modtime --no-checksum --uid 0 --gid 1015 --allow-other --dir-perms 0775 --file-perms 0644 --umask 002 ${READONLY} ${ADD_PARAMS}--daemon & >> /dev/null 2>&1
 
     sleep 5
 
