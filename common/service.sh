@@ -60,6 +60,7 @@ CACHE=${USER_CONFDIR}/.cache
 CACHE_BACKEND=${USER_CONFDIR}/.cache-backend
 HTTP_ADDR=127.0.0.1:38762
 FTP_ADDR=127.0.0.1:38763
+NETCHK_ADDR=google.com
 
 if [[ -z ${INTERACTIVE} ]]; then
 
@@ -76,17 +77,17 @@ fi
 
 custom_params () {
 
-    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME ATTRTIMEOUT CACHEINFOAGE READAHEAD CACHEMODE DISABLE READONLY BINDSD BINDPOINT"
+    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME ATTRTIMEOUT CACHEINFOAGE READAHEAD CACHEMODE DISABLE READONLY BINDSD BINDPOINT NETCHK_ADDR ADD_PARAMS REPLACE_PARAMS"
 
     BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
 
-    if [[ -e $USER_CONFDIR/.$remote.param ]]; then
+    if [[ -e ${USER_CONFDIR}/.${remote}.param ]]; then
 
-        echo "Found .$remote.param"
+        echo "Found .${remote}.param"
 
-        if ! [[ $(egrep -q -iv "$BAD_SYNTAX" $USER_CONFDIR/.$remote.param) ]]; then
+        if ! [[ $(egrep -q -iv "${BAD_SYNTAX}" ${USER_CONFDIR}/.${remote}.param) ]]; then
 
-            echo "loading .$remote.param"
+            echo "loading .${remote}.param"
 
             for PARAM in ${PARAMS[@]}; do
 
@@ -94,16 +95,21 @@ custom_params () {
 
                     if [[ "$(echo "${VAR}" |grep -w "$PARAM")" ]]; then
                         echo "Importing ${VAR}"
-                        eval $(echo "${VAR}" |cut -d ' ' -f 1)
+                        VALUE="$(echo ${VAR} |cut -d '=' -f2)"
+
+                        VALUE=\"${VALUE}\"
+
+                        eval $(echo "${PARAM}""=""${VALUE}")
+
                     fi
 
-                done < $USER_CONFDIR/.$remote.param
+                done < ${USER_CONFDIR}/.${remote}.param
 
             done
 
         else
 
-            echo ".$remote.param contains bad syntax"
+            echo ".${remote}.param contains bad syntax"
 
         fi
 
@@ -111,9 +117,14 @@ custom_params () {
 
 }
 
+remote=global
+custom_params
+unset remote
+echo
+
 NET_CHK() {
 
-   ping -c 5 google.com
+   ping -c 5 ${NETCHK_ADDR}
 
 }
 
@@ -124,69 +135,137 @@ sd_unbind () {
         UNBINDPOINT=${BINDPOINT_DEF}/${remote}
 
         su -M -c umount -lf ${UNBINDPOINT} >> /dev/null 2>&1
-        
+
         UNBINDPOINT=${BINDPOINT_R}/${remote}
-        
+
         su -M -c umount -lf ${UNBINDPOINT} >> /dev/null 2>&1
-        
+
         UNBINDPOINT=${BINDPOINT_W}/${remote}
-    
+
         su -M -c umount -lf ${UNBINDPOINT} >> /dev/null 2>&1
-    
+
     else 
-    
+
         USER_BINDPOINT=${BINDPOINT}
 
         UNBINDPOINT=${RUNTIME_D}/emulated/0/${USER_BINDPOINT}
-        
+
         su -M -c umount -lf ${UNBINDPOINT} >> /dev/null 2>&1
-        
+
         UNBINDPOINT=${RUNTIME_R}/emulated/0/${USER_BINDPOINT}
-        
+
         su -M -c umount -lf ${UNBINDPOINT} >> /dev/null 2>&1
-        
+
         UNBINDPOINT=${RUNTIME_W}/emulated/0/${USER_BINDPOINT}
-        
+
         su -M -c umount -lf ${UNBINDPOINT} >> /dev/null 2>&1
 
         fi
-    
+
 }
 
 sd_binder () {
-    
+
     if [[ -d ${RUNTIME_D} ]] && [[ ${BINDSD} = 1 ]] || [[ -e ${USER_CONFDIR}.bindsd ]]; then
-    
+
         if [[ -z ${BINDPOINT} ]]; then 
 
             mkdir -p ${DATA_MEDIA}/Cloud/${remote}
             chown media_rw:media_rw ${DATA_MEDIA}/Cloud/$remote
-            
+
+            BINDPOINT=${BINDPOINT_D}/${remote}
+
+            su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
+
+            BINDPOINT=${BINDPOINT_R}/${remote}
+
+            if ! mount |grep -q ${BINDPOINT}; then
+
+                su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
+
+            fi
+
+            BINDPOINT=${BINDPOINT_W}/${remote}
+
+            if ! mount |grep -q ${BINDPOINT}; then
+
+            su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
+
+            fi
+
         else 
-        
+
             mkdir ${DATA_MEDIA}/${BINDPOINT} >> /dev/null 2>&1
             chown media_rw:media_rw ${DATA_MEDIA}/${BINDPOINT}
 
+            USER_BINDPOINT=${BINDPOINT}
+            BINDPOINT=${RUNTIME_D}/emulated/0/${USER_BINDPOINT}
+
+            su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
+
+            BINDPOINT=${RUNTIME_R}/emulated/0/${USER_BINDPOINT}
+
+            if ! mount |grep -q ${BINDPOINT}; then
+
+                su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
+
+            fi
+
+            BINDPOINT=${RUNTIME_W}/emulated/0/${USER_BINDPOINT}
+
+            if ! mount |grep -q ${BINDPOINT}; then
+
+                su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
+
+            fi
+
         fi
-
-        if [[ -z ${BINDPOINT} ]]; then
-
-            BINDPOINT=${BINDPOINT_DEF}/${remote}
-    su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} #>> /dev/null 2>&1
-        else 
-            
-           # USER_BINDPOINT=${BINDPOINT}
-            BINDPOINT=${RUNTIME_D}/emulated/0/${BINDPOINT}
-    
-        fi
-
-    su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
 
     fi
-    
-   # su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} #>> /dev/null 2>&1
-    
+
     unset BINDPOINT
+
+}
+
+rclone_mount () {
+
+    if [[ ${READONLY} = 1 ]]; then
+
+        READONLY=" --read-only "
+
+    else
+
+        READONLY=" "
+
+    fi
+
+    if [[ -z ${REPLACE_PARAMS} ]]; then
+
+        RCLONE_PARAMS=" --log-file ${LOGFILE} --log-level ${LOGLEVEL} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-cache-mode ${CACHEMODE} --cache-chunk-no-memory --cache-chunk-size 1M --cache-chunk-total-size ${CACHEMAXSIZE} --cache-workers 1 --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-info-age ${CACHEINFOAGE} --no-modtime --no-checksum --uid 0 --gid 1015 --allow-other --dir-perms 0775 --file-perms 0644 --umask 002 ${READONLY} ${ADD_PARAMS} "
+
+    elif [[ ! -z ${REPLACE_PARAMS} ]]; then
+
+        RCLONE_PARAMS=" ${REPLACE_PARAMS} "
+
+    fi
+
+    if [[ -z ${ADD_PARAMS} ]]; then
+
+        ADD_PARAMS=" "
+
+    elif [[ ! -z ${ADD_PARAMS} ]]; then
+
+        ADD_PARAMS=" ${ADD_PARAMS} "
+
+    fi
+
+    echo "[${remote}] available at: -> [${CLOUDROOTMOUNTPOINT}/${remote}]"
+
+    mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
+
+    su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon & >> /dev/null 2>&1
+
+    sleep 5
 
 }
 
@@ -227,12 +306,6 @@ fi
 if [[ -e ${USER_CONFDIR}/.disable ]]; then 
 
     exit 0
-
-fi
-
-if [[ -e ${USER_CONFDIR}/.bindsd ]]; then 
-
-    BINDSD=1
 
 fi
 
@@ -285,7 +358,7 @@ fi
 if [[ ! -L ${RUNTIME_R}/cloud ]]; then
 
     ln -sf ${CLOUDROOTMOUNTPOINT} ${RUNTIME_R}/cloud
-    
+
 fi
 
 if [[ ! -L ${RUNTIME_W}/cloud ]]; then
@@ -307,30 +380,6 @@ if [[ -e ${USER_CONF} ]]; then
 
 fi
 
-if [[ -e ${USER_CONFDIR}/.nocache ]]; then
-
-    CACHEMODE=off
-
-fi
-
-if [[ -e ${USER_CONFDIR}/.mincache ]]; then
-
-    CACHEMODE=minimal
-
-fi
-
-if [[ -e $USER_CONFDIR/.writecache ]]; then
-
-    CACHEMODE=writes
-
-fi
-
-if [[ -e $USER_CONFDIR/.fullcache ]]; then
-
-    CACHEMODE=full
-
-fi
-
 until NET_CHK || [[ ${COUNT} = 60 ]]; do 
 
     sleep 5
@@ -340,52 +389,36 @@ done >> /dev/null 2>&1
 
 echo "Default CACHEMODE ${CACHEMODE}"
 
-${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
+${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: | 
 
-        while read remote; do
+    while read remote; do
 
-                echo
+        echo
 
-                DISABLE=0
-                READONLY=0
+        DISABLE=0
+        READONLY=0
 
-                custom_params
-                sd_unbind
+        custom_params
 
-                if [[ ${DISABLE} = 1 ]] || [[ -e ${USER_CONFDIR}/.${remote}.disable ]]; then
+        if [[ ${DISABLE} = 1 ]] || [[ -e ${USER_CONFDIR}/.${remote}.disable ]]; then
 
-                    echo "${remote} disabled by user"
-                    continue
+            echo "${remote} disabled by user"
+            continue
 
-                fi
+        fi
 
-                if [[ ${READONLY} = 1 ]]; then
+        sd_unbind
+        rclone_mount
+        sd_binder
 
-                     READONLY=" --read-only "
-
-                else
-
-                     READONLY=" "
-                fi
-
-                echo "[${remote}] available at: -> [${CLOUDROOTMOUNTPOINT}/${remote}]"
-
-                mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
-                
-                su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --log-file ${LOGFILE} --log-level ${LOGLEVEL} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-cache-mode ${CACHEMODE} --cache-chunk-no-memory --cache-chunk-size 1M --cache-chunk-total-size ${CACHEMAXSIZE} --cache-workers 1 --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${DIRCACHETIME} --cache-info-age ${CACHEINFOAGE} --no-modtime --no-checksum --uid 0 --gid 1015 --allow-other --dir-perms 0775 --file-perms 0644 --umask 002 ${READONLY} --daemon & >> /dev/null 2>&1
-
-                sleep 5
-
-                sd_binder
-
-                done
+    done
 
 echo
 
 if $(/sbin/rclone serve http ${CLOUDROOTMOUNTPOINT} --addr ${HTTP_ADDR} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &); then
 
     echo "Notice: /mnt/cloud served via HTTP at: http://${HTTP_ADDR}"
-    
+
 fi
 
 if $(/sbin/rclone serve ftp ${CLOUDROOTMOUNTPOINT} --addr ${FTP_ADDR} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &); then

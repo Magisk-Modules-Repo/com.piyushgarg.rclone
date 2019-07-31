@@ -1,7 +1,7 @@
 ## Rclone Remount for Android
 ---
 
-Remount cloud storage locally via rclone & fusermount directly on your Android powered smart device. 
+Remount cloud storage locally on boot via rclone & fusermount directly on your Android powered smart device. 
 
 Virtually limitless storage expansion with support for dozens of cloud providers including Dropbox, GDrive, OneDrive, SFTP & many more. Extremely useful for devices without physical storage expansion capabilities. Also great for streaming large media files without need for full caching. Binaries obtained directly from rclone.org. 
 
@@ -45,7 +45,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 ---
 ## Custom Params
 
-- Specification of rclone parameters on a per remote basis can be created inside hidden files ending with the `.param` extension
+Specification of rclone parameters on a per remote basis can be created inside hidden files ending with the `.param` extension
 
       /sdcard/.rclone/.*.param
 
@@ -75,32 +75,28 @@ For more detailed configuration of rclone please refer to [official documentatio
 
         BINDPOINT=
 
+        ADD_PARAMS=
+
+        REPLACE_PARAMS=
+
     **NOTE:** _There is no need to specify values you do not wish to change. The above are defaults for all remotes. For more information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)_
 
 ---
 ## Custom Globals
 
-- Specification of global rclone parameters can be created as hidden files in 
+Specification of global rclone parameters can be created in
 
-      /sdcard/.rclone/.*
+      /sdcard/.rclone/.global.param
 
-   _Where `*` represents the global parm you wish to set_
+- Global Specific Parameters
 
-- Global Parameters
+        NET_CHK=google.com
 
-        .bindsd
+- Excluded Parameters
 
-        .nocache
- 
-        .mincache
+        BINDPOINT=
 
-        .writecache
-
-        .fullcache
-
-        .disable
-
-   **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values._
+   **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values. Some parameters are specific to globals while others have been excluded_
 
 ---
 ## Known Issues
@@ -167,5 +163,11 @@ Neither the author nor developer's will be held responsible for any damage/data 
 * Include a wrap for `rclone config`
 * Include `fusermount-wrapper.sh`
 * General Improvements
+
+### v1.6
+* Simplify custom global parameters
+* Fix & improve binding to SD
+* Specify additional  rclone ops with `ADD_PARAMS=`
+* Replace `rclone mount` ops via `REPLACE_PARAMS=`
 
 [![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
