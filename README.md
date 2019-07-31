@@ -168,5 +168,6 @@ Neither the author nor developer's will be held responsible for any damage/data 
 * Simplify custom global parameters
 * Fix & improve binding to SD
 * Specify additional  rclone ops with `ADD_PARAMS=`
+* Replace `rclone mount` ops via `REPLACE_PARAMS=`
 
 [![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
