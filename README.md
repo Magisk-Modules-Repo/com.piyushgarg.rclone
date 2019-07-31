@@ -77,6 +77,8 @@ Specification of rclone parameters on a per remote basis can be created inside h
 
         ADD_PARAMS=
 
+        REPLACE_PARAMS=
+
     **NOTE:** _There is no need to specify values you do not wish to change. The above are defaults for all remotes. For more information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)_
 
 ---
