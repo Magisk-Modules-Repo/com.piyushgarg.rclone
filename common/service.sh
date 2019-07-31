@@ -77,7 +77,7 @@ fi
 
 custom_params () {
 
-    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME ATTRTIMEOUT CACHEINFOAGE READAHEAD CACHEMODE DISABLE READONLY BINDSD BINDPOINT NETCHK_ADDR ADD_PARAMS"
+    PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME ATTRTIMEOUT CACHEINFOAGE READAHEAD CACHEMODE DISABLE READONLY BINDSD BINDPOINT NETCHK_ADDR ADD_PARAMS REPLACE_PARAMS"
 
     BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
 
@@ -239,6 +239,16 @@ rclone_mount () {
 
     fi
 
+    if [[ -z ${REPLACE_PARAMS} ]]; then
+
+        RCLONE_PARAMS=" --log-file ${LOGFILE} --log-level ${LOGLEVEL} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-cache-mode ${CACHEMODE} --cache-chunk-no-memory --cache-chunk-size 1M --cache-chunk-total-size ${CACHEMAXSIZE} --cache-workers 1 --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-info-age ${CACHEINFOAGE} --no-modtime --no-checksum --uid 0 --gid 1015 --allow-other --dir-perms 0775 --file-perms 0644 --umask 002 ${READONLY} ${ADD_PARAMS} "
+
+    elif [[ ! -z ${REPLACE_PARAMS} ]]; then
+
+        RCLONE_PARAMS=" ${REPLACE_PARAMS} "
+
+    fi
+
     if [[ -z ${ADD_PARAMS} ]]; then
 
         ADD_PARAMS=" "
@@ -253,7 +263,7 @@ rclone_mount () {
 
     mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
 
-    su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} --log-file ${LOGFILE} --log-level ${LOGLEVEL} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-cache-mode ${CACHEMODE} --cache-chunk-no-memory --cache-chunk-size 1M --cache-chunk-total-size ${CACHEMAXSIZE} --cache-workers 1 --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-info-age ${CACHEINFOAGE} --no-modtime --no-checksum --uid 0 --gid 1015 --allow-other --dir-perms 0775 --file-perms 0644 --umask 002 ${READONLY} ${ADD_PARAMS}--daemon & >> /dev/null 2>&1
+    su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon & >> /dev/null 2>&1
 
     sleep 5
 
