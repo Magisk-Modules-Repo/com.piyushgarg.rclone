@@ -32,11 +32,9 @@ else
 fi
 
 #MODULE VARS
+CLOUDROOTMOUNTPOINT=/mnt/cloud
 USER_CONFDIR=/sdcard/.rclone
 USER_CONF=${USER_CONFDIR}/rclone.conf
-CONFIGFILE=${HOME}/.config/rclone/rclone.conf
-LOGFILE=${USER_CONFDIR}/rclone.log
-LOGLEVEL=NOTICE
 DATA_MEDIA=/data/media/0
 RUNTIME_R=/mnt/runtime/read
 RUNTIME_W=/mnt/runtime/write
@@ -45,22 +43,32 @@ BINDPOINT_R=${RUNTIME_R}/emulated/0/Cloud
 BINDPOINT_W=${RUNTIME_W}/emulated/0/Cloud
 BINDPOINT_D=${RUNTIME_D}/emulated/0/Cloud
 SD_BINDPOINT=${BINDPOINT_D}
-CLOUDROOTMOUNTPOINT=/mnt/cloud
+DISABLE=0
+NETCHK_ADDR=google.com
 
 #RCLONE PARAMETERS
-DISABLE=0
-BUFFERSIZE=0
-CACHEMAXSIZE=1G
-DIRCACHETIME=30m0s
-ATTRTIMEOUT=30s
-CACHEINFOAGE=1h0m0s
-READAHEAD=128k
-CACHEMODE=off
+CONFIGFILE=${HOME}/.config/rclone/rclone.conf
+LOGFILE=${USER_CONFDIR}/rclone.log
+LOGLEVEL=NOTICE
 CACHE=${USER_CONFDIR}/.cache
 CACHE_BACKEND=${USER_CONFDIR}/.cache-backend
+CACHEMODE=off
+CHUNKSIZE=1M
+CHUNKTOTAL=1G
+CACHEWORKERS=1
+CACHEINFOAGE=1h0m0s
+DIRCACHETIME=30m0s
+ATTRTIMEOUT=30s
+BUFFERSIZE=0
+READAHEAD=128k
+M_UID=0
+M_GID=1015
+DIRPERMS=0775
+FILEPERMS=0644
+HTTP=1
 HTTP_ADDR=127.0.0.1:38762
+FTP=1
 FTP_ADDR=127.0.0.1:38763
-NETCHK_ADDR=google.com
 
 if [[ -z ${INTERACTIVE} ]]; then
 
@@ -78,11 +86,11 @@ custom_params () {
 
     if [[ ${remote} = global ]]; then
 
-        PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME ATTRTIMEOUT CACHEINFOAGE READAHEAD CACHEMODE DISABLE READONLY BINDSD NETCHK_ADDR ADD_PARAMS REPLACE_PARAMS"
+        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD NETCHK_ADDR ADD_PARAMS REPLACE_PARAMS HTTP FTP"
 
     else
 
-        PARAMS="BUFFERSIZE CACHEMAXSIZE DIRCACHETIME ATTRTIMEOUT CACHEINFOAGE READAHEAD CACHEMODE DISABLE READONLY BINDSD BINDPOINT ADD_PARAMS REPLACE_PARAMS"
+        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD BINDPOINT ADD_PARAMS REPLACE_PARAMS"
 
     fi
 
@@ -248,7 +256,7 @@ rclone_mount () {
 
     if [[ -z ${REPLACE_PARAMS} ]]; then
 
-        RCLONE_PARAMS=" --log-file ${LOGFILE} --log-level ${LOGLEVEL} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-cache-mode ${CACHEMODE} --cache-chunk-no-memory --cache-chunk-size 1M --cache-chunk-total-size ${CACHEMAXSIZE} --cache-workers 1 --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-info-age ${CACHEINFOAGE} --no-modtime --no-checksum --uid 0 --gid 1015 --allow-other --dir-perms 0775 --file-perms 0644 --umask 002 ${READONLY} ${ADD_PARAMS} "
+        RCLONE_PARAMS=" --log-file ${LOGFILE} --log-level ${LOGLEVEL} --vfs-cache-mode ${CACHEMODE} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --cache-chunk-size ${CHUNKSIZE} --cache-chunk-total-size ${CHUNKTOTAL} --cache-workers ${CACHEWORKERS} --cache-info-age ${CACHEINFOAGE} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-chunk-no-memory --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --no-modtime --no-checksum --uid ${M_UID} --gid ${M_GID} --allow-other --dir-perms ${DIRPERMS} --file-perms ${FILEPERMS} --umask 002 ${READONLY} ${ADD_PARAMS} "
 
     elif [[ ! -z ${REPLACE_PARAMS} ]]; then
 
@@ -422,16 +430,24 @@ ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
 
 echo
 
-if $(/sbin/rclone serve http ${CLOUDROOTMOUNTPOINT} --addr ${HTTP_ADDR} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &); then
+if [[ ${HTTP} = 1 ]]; then
 
-    echo "Notice: /mnt/cloud served via HTTP at: http://${HTTP_ADDR}"
+    if $(/sbin/rclone serve http ${CLOUDROOTMOUNTPOINT} --addr ${HTTP_ADDR} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &); then
+
+        echo "Notice: /mnt/cloud served via HTTP at: http://${HTTP_ADDR}"
+
+    fi
 
 fi
 
-if $(/sbin/rclone serve ftp ${CLOUDROOTMOUNTPOINT} --addr ${FTP_ADDR} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &); then
+if [[ ${FTP} = 1 ]]; then
 
-    echo "Notice: /mnt/cloud served via FTP at: ftp://${FTP_ADDR}"
+    if $(/sbin/rclone serve ftp ${CLOUDROOTMOUNTPOINT} --addr ${FTP_ADDR} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &); then
 
+        echo "Notice: /mnt/cloud served via FTP at: ftp://${FTP_ADDR}"
+
+    fi
+    
 fi
 
 echo
