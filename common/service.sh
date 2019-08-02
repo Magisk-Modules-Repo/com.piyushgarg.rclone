@@ -53,6 +53,8 @@ LOGLEVEL=NOTICE
 CACHE=${USER_CONFDIR}/.cache
 CACHE_BACKEND=${USER_CONFDIR}/.cache-backend
 CACHEMODE=off
+READCHUNKSIZE=1M
+CACHEMAXSIZE=1G
 CHUNKSIZE=1M
 CHUNKTOTAL=1G
 CACHEWORKERS=1
@@ -65,6 +67,7 @@ M_UID=0
 M_GID=1015
 DIRPERMS=0775
 FILEPERMS=0644
+UMASK=002
 HTTP=1
 HTTP_ADDR=127.0.0.1:38762
 FTP=1
@@ -90,7 +93,7 @@ custom_params () {
 
     else
 
-        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD BINDPOINT ADD_PARAMS REPLACE_PARAMS"
+        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD SDBINDPOINT ADD_PARAMS REPLACE_PARAMS"
 
     fi
 
@@ -145,9 +148,9 @@ NET_CHK() {
 
 sd_unbind () {
 
-    if [[ -z ${BINDPOINT} ]]; then
+    if [[ -z ${SDBINDPOINT} ]]; then
 
-        UNBINDPOINT=${BINDPOINT_DEF}/${remote}
+        UNBINDPOINT=${BINDPOINT_D}/${remote}
 
         su -M -c umount -lf ${UNBINDPOINT} >> /dev/null 2>&1
 
@@ -161,7 +164,7 @@ sd_unbind () {
 
     else 
 
-        USER_BINDPOINT=${BINDPOINT}
+        USER_BINDPOINT=${SDBINDPOINT}
 
         UNBINDPOINT=${RUNTIME_D}/emulated/0/${USER_BINDPOINT}
 
@@ -183,7 +186,7 @@ sd_binder () {
 
     if [[ -d ${RUNTIME_D} ]] && [[ ${BINDSD} = 1 ]] || [[ -e ${USER_CONFDIR}.bindsd ]]; then
 
-        if [[ -z ${BINDPOINT} ]]; then 
+        if [[ -z ${SDBINDPOINT} ]]; then 
 
             mkdir -p ${DATA_MEDIA}/Cloud/${remote}
             chown media_rw:media_rw ${DATA_MEDIA}/Cloud/$remote
@@ -210,10 +213,10 @@ sd_binder () {
 
         else 
 
-            mkdir ${DATA_MEDIA}/${BINDPOINT} >> /dev/null 2>&1
-            chown media_rw:media_rw ${DATA_MEDIA}/${BINDPOINT}
+            mkdir ${DATA_MEDIA}/${SDBINDPOINT} >> /dev/null 2>&1
+            chown media_rw:media_rw ${DATA_MEDIA}/${SDBINDPOINT}
 
-            USER_BINDPOINT=${BINDPOINT}
+            USER_BINDPOINT=${SDBINDPOINT}
             BINDPOINT=${RUNTIME_D}/emulated/0/${USER_BINDPOINT}
 
             su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
@@ -238,7 +241,7 @@ sd_binder () {
 
     fi
 
-    unset BINDPOINT
+    unset SDBINDPOINT
 
 }
 
@@ -256,7 +259,7 @@ rclone_mount () {
 
     if [[ -z ${REPLACE_PARAMS} ]]; then
 
-        RCLONE_PARAMS=" --log-file ${LOGFILE} --log-level ${LOGLEVEL} --vfs-cache-mode ${CACHEMODE} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --cache-chunk-size ${CHUNKSIZE} --cache-chunk-total-size ${CHUNKTOTAL} --cache-workers ${CACHEWORKERS} --cache-info-age ${CACHEINFOAGE} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-chunk-no-memory --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --no-modtime --no-checksum --uid ${M_UID} --gid ${M_GID} --allow-other --dir-perms ${DIRPERMS} --file-perms ${FILEPERMS} --umask 002 ${READONLY} ${ADD_PARAMS} "
+        RCLONE_PARAMS=" --log-file ${LOGFILE} --log-level ${LOGLEVEL} --vfs-cache-mode ${CACHEMODE} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-read-chunk-size ${READCHUNKSIZE} --vfs-cache-max-size ${CACHEMAXSIZE} --cache-chunk-size ${CHUNKSIZE} --cache-chunk-total-size ${CHUNKTOTAL} --cache-workers ${CACHEWORKERS} --cache-info-age ${CACHEINFOAGE} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-chunk-no-memory --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --no-modtime --no-checksum --uid ${M_UID} --gid ${M_GID} --allow-other --dir-perms ${DIRPERMS} --file-perms ${FILEPERMS} --umask ${UMASK} ${READONLY} ${ADD_PARAMS} "
 
     elif [[ ! -z ${REPLACE_PARAMS} ]]; then
 
@@ -307,7 +310,7 @@ sleep 5
 
 if [[ ${COUNT} -eq 240 ]] || [[ ! -d /sdcard/Android ]]; then
 
-    echo "Not decrypted"
+    echo "Not decrypted" >> /data/local/tmp/rclone-remount.log
     exit 0
 
 fi
