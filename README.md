@@ -44,6 +44,7 @@ For more detailed configuration of rclone please refer to [official documentatio
 
 ---
 ## Custom Params
+Custom params has been created as a means for users to adjust this modules default parameters that are set for all remotes inside your rclone.conf. 
 
 Specification of rclone parameters on a per remote basis can be created inside hidden files ending with the `.param` extension
 
@@ -51,35 +52,59 @@ Specification of rclone parameters on a per remote basis can be created inside h
 
    Where `*` is replaced with name of remote
 
-- Parameters and their default values:
+- Custom parameters, their default values & rclone params they represent in `( )`
 
-        BUFFERSIZE=0
+        LOGFILE=/sdcard/.rclone/rclone.log  ( --log-file )
 
-        CACHEMAXSIZE=1G
+        LOGLEVEL=NOTICE  ( --log-level )
 
-        CACHEINFOAGE=30m
+        CACHEMODE=off  ( --vfs-cache-mode )
 
-        DIRCACHETIME=1h
+        CHUNKSIZE=1M  ( --cache-chunk-size )
 
-        ATTRTIMEOUT=30s
+        CHUNKTOTAL=1G  ( --cache-chunk-total-size )
 
-        READAHEAD=128k
+        READCHUNKSIZE=1M  ( --vfs-read-chunk-size )
 
-        CACHEMODE=off
+        CACHEWORKERS=1 ( --cache-workers )
 
-        DISABLE=0
+        CACHEINFOAGE=1h0m0s  ( --cache-info-age )
 
-        READONLY=0
+        DIRCACHETIME=30m0s  ( --dir-cache-time )
 
-        BINDSD=0
+        ATTRTIMEOUT=30s  ( --attr-timeout)
 
-        BINDPOINT=
+        BUFFERSIZE=0  ( --buffer-size )
 
-        ADD_PARAMS=
+        READAHEAD=128k  ( --max-read-ahead )
 
-        REPLACE_PARAMS=
+        M_UID=0  ( --uid )
 
-    **NOTE:** _There is no need to specify values you do not wish to change. The above are defaults for all remotes. For more information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)_
+        M_GID=1015  ( --gid )
+
+        DIRPERMS=0775  ( --dir-perms )
+
+        FILEPERMS=0644  ( --file-perms )
+
+        UMASK=002  ( --umask )
+
+        BINDSD=0  ( default binds remote to /sdcard/Cloud* )
+
+        SDBINDPOINT=  ( relative to /sdcard/ )
+
+- Custom params example
+
+   _The following configuration will disable caching for remote `[Movies]`, bind to `/sdcard/Movies` & add the `-fast-list`/`--allow-non-empty` flags to it's mounting command._
+
+         /sdcard/.rclone/.Movies.param
+
+         1| CACHEMODE=off
+         2| BINDSD=1
+         3| BINDPOINT=Movies
+         4| ADD_PARAMS=--fast-list --allow-non-empty
+         5|
+
+    **NOTE:** _There is no need to specify values you do not wish to change. The above are defaults for all remotes. Ensure a line break/carriage return exist after each specified param or they will not be parsed. For more information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)_
 
 ---
 ## Custom Globals
@@ -92,11 +117,19 @@ Specification of global rclone parameters can be created in
 
         NET_CHK=google.com
 
+        HTTP=1
+
+        HTTP_ADDR=127.0.0.1:38762
+
+        FTP=1
+
+        FTP_ADDR=127.0.0.1:38763
+
 - Excluded Parameters
 
         BINDPOINT=
 
-   **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values. Some parameters are specific to globals while others have been excluded_
+   **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values. Some parameters are specific to globals while others have been excluded._
 
 ---
 ## Known Issues
@@ -169,5 +202,12 @@ Neither the author nor developer's will be held responsible for any damage/data 
 * Fix & improve binding to SD
 * Specify additional  rclone ops with `ADD_PARAMS=`
 * Replace `rclone mount` ops via `REPLACE_PARAMS=`
+
+### v1.7
+* Add ability to disable HTTP/FTP
+* Link rest of default params to custom vars
+* Exclude some custom params from globals
+* Make some globals exclusive 
+* Change `BINDPOINT=` to `SDBINDPOINT`
 
 [![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
