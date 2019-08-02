@@ -68,6 +68,7 @@ M_GID=1015
 DIRPERMS=0775
 FILEPERMS=0644
 UMASK=002
+BINDSD=0
 HTTP=1
 HTTP_ADDR=127.0.0.1:38762
 FTP=1
@@ -135,10 +136,16 @@ custom_params () {
 
 }
 
-remote=global
-custom_params
-unset remote
-echo
+global_params () {
+
+    remote=global
+    custom_params
+    unset remote
+    echo
+
+}
+
+global_params 
 
 NET_CHK() {
 
@@ -413,9 +420,13 @@ ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
 
         echo
 
+        list_remote=${remote}
         DISABLE=0
         READONLY=0
 
+        global_params >> /dev/null 2>&1
+
+        remote=${list_remote}
         custom_params
 
         if [[ ${DISABLE} = 1 ]] || [[ -e ${USER_CONFDIR}/.${remote}.disable ]]; then
