@@ -128,7 +128,7 @@ print_modname() {
   ui_print "*        Magisk Module        *"
   ui_print "*       by: piyushgarg        *"
   ui_print "*******************************"
-  ui_print "*rclone: (v1.48.0) mod: (v1.6)*"
+  ui_print "*rclone: (v1.48.0) mod: (v1.7)*"
   ui_print "*******************************"
 }
 
