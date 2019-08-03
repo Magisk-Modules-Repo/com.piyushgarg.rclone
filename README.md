@@ -1,9 +1,9 @@
-## Rclone Remount for Android
+## Rclone Remount v1.7 for Android
 ---
 
 Remount cloud storage locally on boot via rclone & fusermount directly on your Android powered smart device. 
 
-Virtually limitless storage expansion with support for dozens of cloud providers including Dropbox, GDrive, OneDrive, SFTP & many more. Extremely useful for devices without physical storage expansion capabilities. Also great for streaming large media files without need for full caching. Binaries obtained directly from rclone.org. 
+Virtually limitless storage expansion with support for dozens of cloud providers including Dropbox, GDrive, OneDrive, SFTP & many more. Extremely useful for devices without physical storage expansion capabilities. Also great for streaming large media files without need for full caching.  Binaries compiled using Termux. 
 
 We are constantly striving to improve this project & make it the best. If you experience any issues or have suggestions please file them  [HERE](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues). Contributions to this project are welcomed. 
 
@@ -44,13 +44,13 @@ For more detailed configuration of rclone please refer to [official documentatio
 
 ---
 ## Custom Params
-Custom params has been created as a means for users to adjust this modules default parameters that are set for all remotes inside your rclone.conf. 
+Custom params have been created as a means for users to adjust this modules default parameters which are set for all remotes inside your rclone.conf. 
 
 Specification of rclone parameters on a per remote basis can be created inside hidden files ending with the `.param` extension
 
       /sdcard/.rclone/.*.param
 
-   Where `*` is replaced with name of remote
+   Where `*` is replaced with the name of remote
 
 - Custom parameters, their default values & rclone params they represent in `( )`
 
@@ -92,7 +92,11 @@ Specification of rclone parameters on a per remote basis can be created inside h
 
         SDBINDPOINT=  ( relative to /sdcard/ )
 
-- Custom params example
+
+    
+   **NOTE:** _The above are defaults for all remotes with `.*.param` files containing opposing values. 
+
+- Custom params example #1
 
    _The following configuration will disable caching for remote `[Movies]`, bind to `/sdcard/Movies` & add the `-fast-list`/`--allow-non-empty` flags to it's mounting command._
 
@@ -102,9 +106,9 @@ Specification of rclone parameters on a per remote basis can be created inside h
          2| BINDSD=1
          3| BINDPOINT=Movies
          4| ADD_PARAMS=--fast-list --allow-non-empty
-         5|
+         5| 
 
-    **NOTE:** _There is no need to specify values you do not wish to change. The above are defaults for all remotes. Ensure a line break/carriage return exist after each specified param or they will not be parsed. For more information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)_
+    **NOTE:** _There is no need to specify values you do not wish to change. Ensure a line break/carriage return exist after each specified param or they will not be parsed. For more information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)_
 
 ---
 ## Custom Globals
@@ -127,7 +131,7 @@ Specification of global rclone parameters can be created in
 
 - Excluded Parameters
 
-        BINDPOINT=
+        SDBINDPOINT=
 
    **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values. Some parameters are specific to globals while others have been excluded._
 
@@ -208,6 +212,7 @@ Neither the author nor developer's will be held responsible for any damage/data 
 * Link rest of default params to custom vars
 * Exclude some custom params from globals
 * Make some globals exclusive 
-* Change `BINDPOINT=` to `SDBINDPOINT`
+* Change `BINDPOINT=` to `SDBINDPOINT=`
+* Fix bug with custom params 
 
 [![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
