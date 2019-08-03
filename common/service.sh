@@ -217,6 +217,8 @@ sd_binder () {
             su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
 
             fi
+            
+            echo "[$remote] available at: -> [/sdcard/Cloud/${remote}]"
 
         else 
 
@@ -243,6 +245,8 @@ sd_binder () {
                 su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
 
             fi
+
+            echo "[$remote] available at: -> [/sdcard/${SDBINDPOINT}]"
 
         fi
 
@@ -290,7 +294,9 @@ rclone_mount () {
 
     su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon & >> /dev/null 2>&1
 
-    sleep 5
+    unset RCLONE_PARAMS
+    unset REPLACE_PARAMS
+    unset ADD_PARAMS
 
 }
 
@@ -312,8 +318,6 @@ DECRYPT_CHK () {
     su -M -c ls sdcard |grep -q -w "Android"
 
 }
-
-sleep 5
 
 if [[ ${COUNT} -eq 240 ]] || [[ ! -d /sdcard/Android ]]; then
 
@@ -427,6 +431,7 @@ ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
         global_params >> /dev/null 2>&1
 
         remote=${list_remote}
+
         custom_params
 
         if [[ ${DISABLE} = 1 ]] || [[ -e ${USER_CONFDIR}/.${remote}.disable ]]; then
