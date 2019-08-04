@@ -268,7 +268,7 @@ rclone_mount () {
 
     fi
 
-    if [[ -z ${REPLACE_PARAMS} ]]; then
+    if [[ -z ${REPLACE_PARAMS} ]] || [[ ${REPLACE_PARAMS} = 0 ]]; then
 
         RCLONE_PARAMS=" --log-file ${LOGFILE} --log-level ${LOGLEVEL} --vfs-cache-mode ${CACHEMODE} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-read-chunk-size ${READCHUNKSIZE} --vfs-cache-max-size ${CACHEMAXSIZE} --cache-chunk-size ${CHUNKSIZE} --cache-chunk-total-size ${CHUNKTOTAL} --cache-workers ${CACHEWORKERS} --cache-info-age ${CACHEINFOAGE} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-chunk-no-memory --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --no-modtime --no-checksum --uid ${M_UID} --gid ${M_GID} --allow-other --dir-perms ${DIRPERMS} --file-perms ${FILEPERMS} --umask ${UMASK} ${READONLY} ${ADD_PARAMS} "
 
@@ -278,7 +278,7 @@ rclone_mount () {
 
     fi
 
-    if [[ -z ${ADD_PARAMS} ]]; then
+    if [[ -z ${ADD_PARAMS} ]] || [[ ${ADD_PARAMS} = 0 ]]; then
 
         ADD_PARAMS=" "
 
@@ -332,7 +332,7 @@ if [[ ! -d ${USER_CONFDIR} ]]; then
 
 fi
 
-if [[ -e ${USER_CONFDIR}/.disable ]]; then 
+if [[ -e ${USER_CONFDIR}/.disable ]] && [[ ${INTERACTIVE} = 0 ]]; then 
 
     exit 0
 
