@@ -267,8 +267,20 @@ rclone_mount () {
         READONLY=" "
 
     fi
+    
+    if [[ ${ADD_PARAMS} = 0 ]]; then
+    
+        unset ADD_PARAMS
+        
+    fi
+    
+    if [[ ${REPLACE_PARAMS} = 0 ]]; then
+    
+        unset REPLACE_PARAMS
+        
+    fi
 
-    if [[ -z ${REPLACE_PARAMS} ]] || [[ ${REPLACE_PARAMS} = 0 ]]; then
+    if [[ -z ${REPLACE_PARAMS} ]]; then
 
         RCLONE_PARAMS=" --log-file ${LOGFILE} --log-level ${LOGLEVEL} --vfs-cache-mode ${CACHEMODE} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-read-chunk-size ${READCHUNKSIZE} --vfs-cache-max-size ${CACHEMAXSIZE} --cache-chunk-size ${CHUNKSIZE} --cache-chunk-total-size ${CHUNKTOTAL} --cache-workers ${CACHEWORKERS} --cache-info-age ${CACHEINFOAGE} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-chunk-no-memory --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --no-modtime --no-checksum --uid ${M_UID} --gid ${M_GID} --allow-other --dir-perms ${DIRPERMS} --file-perms ${FILEPERMS} --umask ${UMASK} ${READONLY} ${ADD_PARAMS} "
 
@@ -278,7 +290,7 @@ rclone_mount () {
 
     fi
 
-    if [[ -z ${ADD_PARAMS} ]] || [[ ${ADD_PARAMS} = 0 ]]; then
+    if [[ -z ${ADD_PARAMS} ]]; then
 
         ADD_PARAMS=" "
 
