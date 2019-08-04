@@ -1,7 +1,7 @@
 ## Rclone Remount v1.7 for Android
 ---
 
-Remount cloud storage locally on boot via rclone & fusermount directly on your Android powered smart device. 
+Remount cloud storage locally during boot via rclone & fusermount directly on your Android powered smart device. 
 
 Virtually limitless storage expansion with support for dozens of cloud providers including Dropbox, GDrive, OneDrive, SFTP & many more. Extremely useful for devices without physical storage expansion capabilities. Also great for streaming large media files without need for full caching.  Binaries compiled using Termux. 
 
@@ -92,11 +92,15 @@ Specification of rclone parameters on a per remote basis can be created inside h
 
         SDBINDPOINT=  ( relative to /sdcard/ )
 
+        ADD_PARAMS=0
+
+        REPLACE_PARAMS=0
+
 
     
-   **NOTE:** _The above are defaults for all remotes with `.*.param` files containing opposing values. 
+   **NOTE:** _The above are defaults for all remotes without `.*.param` files containing opposing values. 
 
-- Custom params example #1
+- Custom remote params example #1
 
    _The following configuration will disable caching for remote `[Movies]`, bind to `/sdcard/Movies` & add the `-fast-list`/`--allow-non-empty` flags to it's mounting command._
 
@@ -104,7 +108,7 @@ Specification of rclone parameters on a per remote basis can be created inside h
 
          1| CACHEMODE=off
          2| BINDSD=1
-         3| BINDPOINT=Movies
+         3| SDBINDPOINT=Movies
          4| ADD_PARAMS=--fast-list --allow-non-empty
          5| 
 
@@ -133,7 +137,40 @@ Specification of global rclone parameters can be created in
 
         SDBINDPOINT=
 
+- Custom globals params example #1
+
+  _The following configuration will enable minimal caching for all remotes, bind to `/sdcard/Cloud/*`, disable HTTP/FTP & add the `-fast-list`/`--allow-non-empty` flags to their mounting command(s)._
+
+         /sdcard/.rclone/.global.param
+
+         1| CACHEMODE=minimal
+         2| BINDSD=1
+         3| ADD_PARAMS=--fast-list --allow-non-empty
+         4| HTTP=0
+         5| FTP=0
+         6| 
+
+
    **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values. Some parameters are specific to globals while others have been excluded._
+
+---
+## How Custom Params Work
+
+In order for users to  appropriately utilize  `ADD_PARAMS=` or `REPLACE_PARAMS=` they will need a little background on the parameters that are set by default. 
+
+- Currently we use the params listed here (directly from service.sh):
+
+  `RCLONE_PARAMS=" --log-file --log-level ${L --vfs-cache-mode ${CACHEMODE} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-read-chunk-size ${READCHUNKSIZE} --vfs-cache-max-size ${CACHEMAXSIZE} --cache-chunk-size ${CHUNKSIZE} --cache-chunk-total-size ${CHUNKTOTAL} --cache-workers ${CACHEWORKERS} --cache-info-age ${CACHEINFOAGE} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-chunk-no-memory --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --no-modtime --no-checksum --uid ${M_UID} --gid ${M_GID} --allow-other --dir-perms ${DIRPERMS} --file-perms ${FILEPERMS} --umask ${UMASK} ${READONLY} ${ADD_PARAMS} "`
+
+  **NOTE:** _When using the `ADD_PARAMS=` it will append any additonal params you wish to specify at the point of `${ADD_PARAMS}` in a fill in the blank manner._
+
+- The script then takes `RCLONE_PARAMS=` and fills in blank at `${RCLONE_PARAMS}`
+
+  `rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon &`
+
+  **NOTE:** _Everything before and after `${RCLONE_PARAMS}` cannot not be replaced even with `REPLACE_PARAMS=` specified._
+
+- When using `REPLACE_PARAMS=` `RCLONE_PARAMS=` becomes `RCLONE_PARAMS=" ${REPLACE_PARAMS} "`
 
 ---
 ## Known Issues
@@ -213,6 +250,6 @@ Neither the author nor developer's will be held responsible for any damage/data 
 * Exclude some custom params from globals
 * Make some globals exclusive 
 * Change `BINDPOINT=` to `SDBINDPOINT=`
-* Fix bug with custom params 
+* Fix bug with custom params
 
 [![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
