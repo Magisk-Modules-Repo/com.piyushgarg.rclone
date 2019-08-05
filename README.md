@@ -154,15 +154,17 @@ Specification of global rclone parameters can be created in
    **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values. Some parameters are specific to globals while others have been excluded._
 
 ---
-## How Custom Params Work
+## Replacing & Adding Params 
 
 In order for users to  appropriately utilize  `ADD_PARAMS=` or `REPLACE_PARAMS=` they will need a little background on the parameters that are set by default. 
 
-- Currently we use the params listed here (directly from service.sh):
+- Currently specified params shown here 
+
+  (directly from service.sh):
 
   `RCLONE_PARAMS=" --log-file --log-level ${L --vfs-cache-mode ${CACHEMODE} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-read-chunk-size ${READCHUNKSIZE} --vfs-cache-max-size ${CACHEMAXSIZE} --cache-chunk-size ${CHUNKSIZE} --cache-chunk-total-size ${CHUNKTOTAL} --cache-workers ${CACHEWORKERS} --cache-info-age ${CACHEINFOAGE} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-chunk-no-memory --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --no-modtime --no-checksum --uid ${M_UID} --gid ${M_GID} --allow-other --dir-perms ${DIRPERMS} --file-perms ${FILEPERMS} --umask ${UMASK} ${READONLY} ${ADD_PARAMS} "`
 
-  **NOTE:** _When using the `ADD_PARAMS=` it will append any additonal params you wish to specify at the point of `${ADD_PARAMS}` in a fill in the blank manner._
+  **NOTE:** _When using the `ADD_PARAMS=` it will append any additonal params you wish to specify at the point of `${ADD_PARAMS}` (above) in a fill in the blank manner._
 
 - The script then takes `RCLONE_PARAMS=` and fills in blank at `${RCLONE_PARAMS}`
 
