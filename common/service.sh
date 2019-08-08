@@ -32,6 +32,7 @@ else
 fi
 
 #MODULE VARS
+SYSBIN=/system/bin
 CLOUDROOTMOUNTPOINT=/mnt/cloud
 USER_CONFDIR=/sdcard/.rclone
 USER_CONF=${USER_CONFDIR}/rclone.conf
@@ -44,6 +45,7 @@ BINDPOINT_W=${RUNTIME_W}/emulated/0/Cloud
 BINDPOINT_D=${RUNTIME_D}/emulated/0/Cloud
 SD_BINDPOINT=${BINDPOINT_D}
 DISABLE=0
+NETCHK=1
 NETCHK_ADDR=google.com
 
 #RCLONE PARAMETERS
@@ -90,7 +92,7 @@ custom_params () {
 
     if [[ ${remote} = global ]]; then
 
-        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD NETCHK_ADDR ADD_PARAMS REPLACE_PARAMS HTTP FTP"
+        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD NETCHK_ADDR ADD_PARAMS REPLACE_PARAMS HTTP FTP HTTP_ADDR FTP_ADDR"
 
     else
 
@@ -112,7 +114,7 @@ custom_params () {
 
                 while read -r VAR; do
 
-                    if [[ "$(echo "${VAR}" |grep -w "$PARAM")" ]]; then
+                    if [[ "$(echo "${VAR}" |grep -w "$PARAM=")" ]]; then
                         echo "Importing ${VAR}"
                         VALUE="$(echo ${VAR} |cut -d '=' -f2)"
 
@@ -145,11 +147,11 @@ global_params () {
 
 }
 
-global_params 
+global_params
 
-NET_CHK() {
+net_chk() {
 
-   ping -c 5 ${NETCHK_ADDR}
+   ${SYSBIN}/ping -c 5 ${NETCHK_ADDR}
 
 }
 
@@ -421,14 +423,20 @@ if [[ -e ${USER_CONF} ]]; then
 
 fi
 
-until NET_CHK || [[ ${COUNT} = 60 ]]; do 
+if [[ ${NETCHK} = 1 ]]; then
 
-    sleep 5
-    ((++COUNT))
+    until net_chk || [[ ${COUNT} = 60 ]]; do 
 
-done >> /dev/null 2>&1
+        sleep 5
+        ((++COUNT))
+
+    done >> /dev/null 2>&1
+
+fi
 
 echo "Default CACHEMODE ${CACHEMODE}"
+
+sleep 5
 
 ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: | 
 
