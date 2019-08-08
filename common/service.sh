@@ -114,7 +114,7 @@ custom_params () {
 
                 while read -r VAR; do
 
-                    if [[ "$(echo "${VAR}" |grep -w "$PARAM=")" ]]; then
+                    if [[ "$(echo "${VAR}" |grep "$PARAM=")" ]]; then
                         echo "Importing ${VAR}"
                         VALUE="$(echo ${VAR} |cut -d '=' -f2)"
 
@@ -151,7 +151,7 @@ global_params
 
 net_chk() {
 
-   ${SYSBIN}/ping -c 5 ${NETCHK_ADDR}
+   ping -c 5 ${NETCHK_ADDR}
 
 }
 
