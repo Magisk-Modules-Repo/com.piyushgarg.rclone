@@ -425,9 +425,6 @@ if [[ -e ${USER_CONF} ]]; then
 
 fi
 
-echo ${PING} >> /data/local/tmp/Netchk.Log
-which ping >> /data/local/tmp/Netchk.Log
-
 if [[ ${NETCHK} = 1 ]]; then
 
     until net_chk || [[ ${COUNT} = 60 ]]; do 
