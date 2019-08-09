@@ -5,6 +5,8 @@
 # This will make sure your module will work
 # if Magisk changes it's mount point in the future
 
+PATH=/system/bin:/sbin:/sbin/.core/busybox:/system/xbin
+
 MODDIR=${0%/*}
 
 IMGDIR=/sbin/.core/img
@@ -92,7 +94,7 @@ custom_params () {
 
     if [[ ${remote} = global ]]; then
 
-        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD NETCHK_ADDR ADD_PARAMS REPLACE_PARAMS HTTP FTP HTTP_ADDR FTP_ADDR"
+        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD ADD_PARAMS REPLACE_PARAMS NETCHK NETCHK_ADDR HTTP FTP HTTP_ADDR FTP_ADDR"
 
     else
 
@@ -147,11 +149,9 @@ global_params () {
 
 }
 
-global_params
-
 net_chk() {
 
-   ping -c 5 ${NETCHK_ADDR}
+    ping -c 5 ${NETCHK_ADDR}
 
 }
 
@@ -352,6 +352,8 @@ if [[ -e ${USER_CONFDIR}/.disable ]] && [[ ${INTERACTIVE} = 0 ]]; then
 
 fi
 
+global_params
+
 if [[ ! -d ${CLOUDROOTMOUNTPOINT} ]]; then
 
     mkdir -p ${CLOUDROOTMOUNTPOINT}
@@ -422,6 +424,9 @@ if [[ -e ${USER_CONF} ]]; then
     chmod 0600 ${CONFIGFILE}
 
 fi
+
+echo ${PING} >> /data/local/tmp/Netchk.Log
+which ping >> /data/local/tmp/Netchk.Log
 
 if [[ ${NETCHK} = 1 ]]; then
 
