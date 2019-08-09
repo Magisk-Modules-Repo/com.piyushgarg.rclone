@@ -123,7 +123,9 @@ Specification of global rclone parameters can be created in
 
 - Global Specific Parameters
 
-        NET_CHK=google.com
+        NETCHK=1
+
+        NETCHK_ADDR=google.com
 
         HTTP=1
 
@@ -162,8 +164,10 @@ In order for users to  appropriately utilize  `ADD_PARAMS=` or `REPLACE_PARAMS=`
 
   (directly from service.sh):
 
-  `RCLONE_PARAMS=" --log-file --log-level ${L --vfs-cache-mode ${CACHEMODE} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-read-chunk-size ${READCHUNKSIZE} --vfs-cache-max-size ${CACHEMAXSIZE} --cache-chunk-size ${CHUNKSIZE} --cache-chunk-total-size ${CHUNKTOTAL} --cache-workers ${CACHEWORKERS} --cache-info-age ${CACHEINFOAGE} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-chunk-no-memory --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --no-modtime --no-checksum --uid ${M_UID} --gid ${M_GID} --allow-other --dir-perms ${DIRPERMS} --file-perms ${FILEPERMS} --umask ${UMASK} ${READONLY} ${ADD_PARAMS} "`
+  `RCLONE_PARAMS=" --log-file ${LOGFILE} --log-level ${LOGLEVEL} --vfs-cache-mode ${CACHEMODE} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-read-chunk-size ${READCHUNKSIZE} --vfs-cache-max-size ${CACHEMAXSIZE} --cache-chunk-size ${CHUNKSIZE} --cache-chunk-total-size ${CHUNKTOTAL} --cache-workers ${CACHEWORKERS} --cache-info-age ${CACHEINFOAGE} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-chunk-no-memory --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --no-modtime --no-checksum --uid ${M_UID} --gid ${M_GID} --allow-other --dir-perms ${DIRPERMS} --file-perms ${FILEPERMS} --umask ${UMASK} ${READONLY} ${ADD_PARAMS} "`
 
+                                ^
+  
   **NOTE:** _When using the `ADD_PARAMS=` it will append any additonal params you wish to specify at the point of `${ADD_PARAMS}` (above) in a fill in the blank manner._
 
 - The script then takes `RCLONE_PARAMS=` and fills in blank at `${RCLONE_PARAMS}`
@@ -232,7 +236,7 @@ Neither the author nor developer's will be held responsible for any damage/data 
 ### v1.5
 * Replace arm/arm64  `rclone` 1.48 bins built with Termux
 * Replace arm/arm64 `fusermount` built with Termux
-*  Add arm/arm64 `libandroid-support.so` from Termux
+* Add arm/arm64 `libandroid-support.so` from Termux
 * Support for mounting to SD
 * Squash missing rclone.conf install bug
 * Tune default parameters
@@ -253,5 +257,6 @@ Neither the author nor developer's will be held responsible for any damage/data 
 * Make some globals exclusive 
 * Change `BINDPOINT=` to `SDBINDPOINT=`
 * Fix bug with custom params
+* Set `PATH=` to change priority of used bins
 
 [![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
