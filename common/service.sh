@@ -255,6 +255,7 @@ sd_binder () {
     fi
 
     unset SDBINDPOINT
+    unset BINDSD
 
 }
 
