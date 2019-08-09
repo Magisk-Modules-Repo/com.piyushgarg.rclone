@@ -1,9 +1,9 @@
-## Rclone Remount for Android
+## Rclone Remount v1.7 for Android
 ---
 
-Remount cloud storage locally on boot via rclone & fusermount directly on your Android powered smart device. 
+Remount cloud storage locally during boot via rclone & fusermount directly on your Android powered smart device. 
 
-Virtually limitless storage expansion with support for dozens of cloud providers including Dropbox, GDrive, OneDrive, SFTP & many more. Extremely useful for devices without physical storage expansion capabilities. Also great for streaming large media files without need for full caching. Binaries obtained directly from rclone.org. 
+Virtually limitless storage expansion with support for dozens of cloud providers including Dropbox, GDrive, OneDrive, SFTP & many more. Extremely useful for devices without physical storage expansion capabilities. Also great for streaming large media files without need for full caching.  Binaries compiled using Termux. 
 
 We are constantly striving to improve this project & make it the best. If you experience any issues or have suggestions please file them  [HERE](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues). Contributions to this project are welcomed. 
 
@@ -44,42 +44,75 @@ For more detailed configuration of rclone please refer to [official documentatio
 
 ---
 ## Custom Params
+Custom params have been created as a means for users to adjust this modules default parameters which are set for all remotes inside your rclone.conf. 
 
 Specification of rclone parameters on a per remote basis can be created inside hidden files ending with the `.param` extension
 
       /sdcard/.rclone/.*.param
 
-   Where `*` is replaced with name of remote
+   Where `*` is replaced with the name of remote
 
-- Parameters and their default values:
+- Custom parameters, their default values & rclone params they represent in `( )`
 
-        BUFFERSIZE=0
+        LOGFILE=/sdcard/.rclone/rclone.log  ( --log-file )
 
-        CACHEMAXSIZE=1G
+        LOGLEVEL=NOTICE  ( --log-level )
 
-        CACHEINFOAGE=30m
+        CACHEMODE=off  ( --vfs-cache-mode )
 
-        DIRCACHETIME=1h
+        CHUNKSIZE=1M  ( --cache-chunk-size )
 
-        ATTRTIMEOUT=30s
+        CHUNKTOTAL=1G  ( --cache-chunk-total-size )
 
-        READAHEAD=128k
+        READCHUNKSIZE=1M  ( --vfs-read-chunk-size )
 
-        CACHEMODE=off
+        CACHEWORKERS=1 ( --cache-workers )
 
-        DISABLE=0
+        CACHEINFOAGE=1h0m0s  ( --cache-info-age )
 
-        READONLY=0
+        DIRCACHETIME=30m0s  ( --dir-cache-time )
 
-        BINDSD=0
+        ATTRTIMEOUT=30s  ( --attr-timeout)
 
-        BINDPOINT=
+        BUFFERSIZE=0  ( --buffer-size )
 
-        ADD_PARAMS=
+        READAHEAD=128k  ( --max-read-ahead )
 
-        REPLACE_PARAMS=
+        M_UID=0  ( --uid )
 
-    **NOTE:** _There is no need to specify values you do not wish to change. The above are defaults for all remotes. For more information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)_
+        M_GID=1015  ( --gid )
+
+        DIRPERMS=0775  ( --dir-perms )
+
+        FILEPERMS=0644  ( --file-perms )
+
+        UMASK=002  ( --umask )
+
+        BINDSD=0  ( default binds remote to /sdcard/Cloud* )
+
+        SDBINDPOINT=  ( relative to /sdcard/ )
+
+        ADD_PARAMS=0
+
+        REPLACE_PARAMS=0
+
+
+    
+   **NOTE:** _The above are defaults for all remotes without `.*.param` files containing opposing values. 
+
+- Custom remote params example #1
+
+   _The following configuration will disable caching for remote `[Movies]`, bind to `/sdcard/Movies` & add the `-fast-list`/`--allow-non-empty` flags to it's mounting command._
+
+         /sdcard/.rclone/.Movies.param
+
+         1| CACHEMODE=off
+         2| BINDSD=1
+         3| SDBINDPOINT=Movies
+         4| ADD_PARAMS=--fast-list --allow-non-empty
+         5| 
+
+    **NOTE:** _There is no need to specify values you do not wish to change. Ensure a line break/carriage return exist after each specified param or they will not be parsed. For more information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)_
 
 ---
 ## Custom Globals
@@ -90,13 +123,60 @@ Specification of global rclone parameters can be created in
 
 - Global Specific Parameters
 
-        NET_CHK=google.com
+        NETCHK=1
+
+        NETCHK_ADDR=google.com
+
+        HTTP=1
+
+        HTTP_ADDR=127.0.0.1:38762
+
+        FTP=1
+
+        FTP_ADDR=127.0.0.1:38763
 
 - Excluded Parameters
 
-        BINDPOINT=
+        SDBINDPOINT=
 
-   **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values. Some parameters are specific to globals while others have been excluded_
+- Custom globals params example #1
+
+  _The following configuration will enable minimal caching for all remotes, bind to `/sdcard/Cloud/*`, disable HTTP/FTP & add the `-fast-list`/`--allow-non-empty` flags to their mounting command(s)._
+
+         /sdcard/.rclone/.global.param
+
+         1| CACHEMODE=minimal
+         2| BINDSD=1
+         3| ADD_PARAMS=--fast-list --allow-non-empty
+         4| HTTP=0
+         5| FTP=0
+         6| 
+
+
+   **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values. Some parameters are specific to globals while others have been excluded._
+
+---
+## Replacing & Adding Params 
+
+In order for users to  appropriately utilize  `ADD_PARAMS=` or `REPLACE_PARAMS=` they will need a little background on the parameters that are set by default. 
+
+- Currently specified params shown here 
+
+  (directly from service.sh):
+
+  `RCLONE_PARAMS=" --log-file ${LOGFILE} --log-level ${LOGLEVEL} --vfs-cache-mode ${CACHEMODE} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-read-chunk-size ${READCHUNKSIZE} --vfs-cache-max-size ${CACHEMAXSIZE} --cache-chunk-size ${CHUNKSIZE} --cache-chunk-total-size ${CHUNKTOTAL} --cache-workers ${CACHEWORKERS} --cache-info-age ${CACHEINFOAGE} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-chunk-no-memory --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --no-modtime --no-checksum --uid ${M_UID} --gid ${M_GID} --allow-other --dir-perms ${DIRPERMS} --file-perms ${FILEPERMS} --umask ${UMASK} ${READONLY} ${ADD_PARAMS} "`
+
+                                ^
+  
+  **NOTE:** _When using the `ADD_PARAMS=` it will append any additonal params you wish to specify at the point of `${ADD_PARAMS}` (above) in a fill in the blank manner._
+
+- The script then takes `RCLONE_PARAMS=` and fills in blank at `${RCLONE_PARAMS}`
+
+  `rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon &`
+
+  **NOTE:** _Everything before and after `${RCLONE_PARAMS}` cannot not be replaced even with `REPLACE_PARAMS=` specified._
+
+- When using `REPLACE_PARAMS=` `RCLONE_PARAMS=` becomes `RCLONE_PARAMS=" ${REPLACE_PARAMS} "`
 
 ---
 ## Known Issues
@@ -156,7 +236,7 @@ Neither the author nor developer's will be held responsible for any damage/data 
 ### v1.5
 * Replace arm/arm64  `rclone` 1.48 bins built with Termux
 * Replace arm/arm64 `fusermount` built with Termux
-*  Add arm/arm64 `libandroid-support.so` from Termux
+* Add arm/arm64 `libandroid-support.so` from Termux
 * Support for mounting to SD
 * Squash missing rclone.conf install bug
 * Tune default parameters
@@ -169,5 +249,14 @@ Neither the author nor developer's will be held responsible for any damage/data 
 * Fix & improve binding to SD
 * Specify additional  rclone ops with `ADD_PARAMS=`
 * Replace `rclone mount` ops via `REPLACE_PARAMS=`
+
+### v1.7
+* Add ability to disable HTTP/FTP
+* Link rest of default params to custom vars
+* Exclude some custom params from globals
+* Make some globals exclusive 
+* Change `BINDPOINT=` to `SDBINDPOINT=`
+* Fix bug with custom params
+* Set `PATH=` to change priority of used bins
 
 [![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
