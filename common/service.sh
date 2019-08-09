@@ -193,7 +193,7 @@ sd_unbind () {
 
 sd_binder () {
 
-    if [[ -d ${RUNTIME_D} ]] && [[ ${BINDSD} = 1 ]] || [[ -e ${USER_CONFDIR}.bindsd ]]; then
+    if [[ -d ${RUNTIME_D} ]] && [[ ${BINDSD} = 1 ]]; then
 
         if [[ -z ${SDBINDPOINT} ]]; then 
 
@@ -336,7 +336,6 @@ DECRYPT_CHK () {
 
 if [[ ${COUNT} -eq 240 ]] || [[ ! -d /sdcard/Android ]]; then
 
-    echo "Not decrypted" >> /data/local/tmp/rclone-remount.log
     exit 0
 
 fi
