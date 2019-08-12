@@ -38,13 +38,14 @@ SYSBIN=/system/bin
 CLOUDROOTMOUNTPOINT=/mnt/cloud
 USER_CONFDIR=/sdcard/.rclone
 USER_CONF=${USER_CONFDIR}/rclone.conf
-DATA_MEDIA=/data/media/0
+PROFILE=0
+DATA_MEDIA=/data/media/${PROFILE}
 RUNTIME_R=/mnt/runtime/read
 RUNTIME_W=/mnt/runtime/write
 RUNTIME_D=/mnt/runtime/default
-BINDPOINT_R=${RUNTIME_R}/emulated/0/Cloud
-BINDPOINT_W=${RUNTIME_W}/emulated/0/Cloud
-BINDPOINT_D=${RUNTIME_D}/emulated/0/Cloud
+BINDPOINT_R=${RUNTIME_R}/emulated/${PROFILE}/Cloud
+BINDPOINT_W=${RUNTIME_W}/emulated/${PROFILE}/Cloud
+BINDPOINT_D=${RUNTIME_D}/emulated/${PROFILE}/Cloud
 SD_BINDPOINT=${BINDPOINT_D}
 DISABLE=0
 NETCHK=1
@@ -94,11 +95,11 @@ custom_params () {
 
     if [[ ${remote} = global ]]; then
 
-        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD ADD_PARAMS REPLACE_PARAMS NETCHK NETCHK_ADDR HTTP FTP HTTP_ADDR FTP_ADDR"
+        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD ADD_PARAMS REPLACE_PARAMS NETCHK NETCHK_ADDR HTTP FTP HTTP_ADDR FTP_ADDR PROFILE ISOLATE"
 
     else
 
-        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD SDBINDPOINT ADD_PARAMS REPLACE_PARAMS"
+        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD SDBINDPOINT ADD_PARAMS REPLACE_PARAMS PROFILE ISOLATE"
 
     fi
 
@@ -175,15 +176,15 @@ sd_unbind () {
 
         USER_BINDPOINT=${SDBINDPOINT}
 
-        UNBINDPOINT=${RUNTIME_D}/emulated/0/${USER_BINDPOINT}
+        UNBINDPOINT=${RUNTIME_D}/emulated/${PROFILE}/${USER_BINDPOINT}
 
         su -M -c umount -lf ${UNBINDPOINT} >> /dev/null 2>&1
 
-        UNBINDPOINT=${RUNTIME_R}/emulated/0/${USER_BINDPOINT}
+        UNBINDPOINT=${RUNTIME_R}/emulated/${PROFILE}/${USER_BINDPOINT}
 
         su -M -c umount -lf ${UNBINDPOINT} >> /dev/null 2>&1
 
-        UNBINDPOINT=${RUNTIME_W}/emulated/0/${USER_BINDPOINT}
+        UNBINDPOINT=${RUNTIME_W}/emulated/${PROFILE}/${USER_BINDPOINT}
 
         su -M -c umount -lf ${UNBINDPOINT} >> /dev/null 2>&1
 
@@ -228,11 +229,11 @@ sd_binder () {
             chown media_rw:media_rw ${DATA_MEDIA}/${SDBINDPOINT}
 
             USER_BINDPOINT=${SDBINDPOINT}
-            BINDPOINT=${RUNTIME_D}/emulated/0/${USER_BINDPOINT}
+            BINDPOINT=${RUNTIME_D}/emulated/${PROFILE}/${USER_BINDPOINT}
 
             su -M -c mount --bind ${CLOUDROOTMOUNTPOINT}/${remote} ${BINDPOINT} >> /dev/null 2>&1
 
-            BINDPOINT=${RUNTIME_R}/emulated/0/${USER_BINDPOINT}
+            BINDPOINT=${RUNTIME_R}/emulated/${PROFILE}/${USER_BINDPOINT}
 
             if ! mount |grep -q ${BINDPOINT}; then
 
@@ -240,7 +241,7 @@ sd_binder () {
 
             fi
 
-            BINDPOINT=${RUNTIME_W}/emulated/0/${USER_BINDPOINT}
+            BINDPOINT=${RUNTIME_W}/emulated/${PROFILE}/${USER_BINDPOINT}
 
             if ! mount |grep -q ${BINDPOINT}; then
 
@@ -447,6 +448,8 @@ ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
         echo
 
         list_remote=${remote}
+        CLOUDROOTMOUNTPOINT=/mnt/cloud
+        PROFILE=0
         DISABLE=0
         READONLY=0
 
@@ -455,6 +458,12 @@ ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
         remote=${list_remote}
 
         custom_params
+
+        if [[ ${ISOLATE} = 1 ]] && [[ ${PROFILE} -gt 0 ]] && [[ ${BINDSD} = 1 ]]; then
+        
+            CLOUDROOTMOUNTPOINT=/data/media/${PROFILE}/.cloud
+
+        fi
 
         if [[ ${DISABLE} = 1 ]] || [[ -e ${USER_CONFDIR}/.${remote}.disable ]]; then
 
