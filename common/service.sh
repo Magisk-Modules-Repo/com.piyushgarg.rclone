@@ -78,6 +78,7 @@ HTTP=1
 HTTP_ADDR=127.0.0.1:38762
 FTP=1
 FTP_ADDR=127.0.0.1:38763
+SYNCWIFI=1
 
 if [[ -z ${INTERACTIVE} ]]; then
 
@@ -99,8 +100,7 @@ custom_params () {
 
     else
 
-        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD SDBINDPOINT ADD_PARAMS REPLACE_PARAMS PROFILE ISOLATE"
-
+        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD SDBINDPOINT ADD_PARAMS REPLACE_PARAMS PROFILE ISOLATE SDSYNCDIRS SYNCWIFI"
     fi
 
     BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
@@ -254,10 +254,56 @@ sd_binder () {
         fi
 
     fi
+}
 
+syncd_service () {
+    
+    if [[ ! -z ${SDSYNCDIRS} ]]; then
+
+        export PIDFILE=${HOME}/tmp/${remote}-syncd.pids
+
+        kill -9 $(cat ${PIDFILE}) >> /dev/null 2>&1
+rm ${PIDFILE} >> /dev/null 2>&1
+
+        if [[ ! -d ${HOME}/tmp ]]; then
+
+            mkdir -p ${HOME}/tmp
+
+        fi
+
+    export CLOUDROOTMOUNTPOINT
+    export PROFILE
+    export HOME
+    export remote
+    export SYNCWIFI
+
+        for SYNCDIR in ${SDSYNCDIRS[@]}; do
+
+            export SYNCDIR
+
+            ${HOME}/syncd.sh & >> /dev/null 2>&1
+
+        done
+
+    fi
+
+    unset SDSYNCDIRS
+    unset SYNCDIR
+
+
+}
+
+reset_params () {
+    
     unset SDBINDPOINT
     unset BINDSD
-
+    unset RCLONE_PARAMS
+    unset REPLACE_PARAMS
+    unset ADD_PARAMS
+    unset SYNCDIR
+    unset SDSYNCDIRS
+    unset PIDFILE
+    SYNCWIFI=1
 }
 
 rclone_mount () {
@@ -309,10 +355,6 @@ rclone_mount () {
     mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
 
     su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon & >> /dev/null 2>&1
-
-    unset RCLONE_PARAMS
-    unset REPLACE_PARAMS
-    unset ADD_PARAMS
 
 }
 
@@ -475,6 +517,8 @@ ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
         sd_unbind
         rclone_mount
         sd_binder
+        syncd_service
+        reset_params
 
     done
 
