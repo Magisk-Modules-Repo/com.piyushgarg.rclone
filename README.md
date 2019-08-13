@@ -233,28 +233,24 @@ Neither the author nor developer's will be held responsible for any damage/data 
 ---
 ## Changelog
 
-### v1.1
-* Initial release
-* rclone mount
+### v1.8
+* Support for Work Profiles `PROFILE=`
+* Isolate to Work Profiles `ISOLATE=`
 
-### v1.2
-* Change install process
-* Changes for full systemless
-* Improve mount reliability
-* Symlink mountpoint to `/storage/`
+### v1.7
+* Add ability to disable HTTP/FTP
+* Link rest of default params to custom vars
+* Exclude some custom params from globals
+* Make some globals exclusive 
+* Change `BINDPOINT=` to `SDBINDPOINT=`
+* Fix bug with custom params
+* Set `PATH=` to change priority of used bins
 
-### v1.3
-* Move user rclone.conf & related to `/sdcard/.rclone/`
-* Control global `--vfs-cache-mode` via simple files placed in `/sdcard/.rclone/`
-* Specify custom params for individual remotes via `/sdcard/.rclone/.REMOTENAME.params`
-
-### v1.4
-* Add ability to disable a remote 
-* Add a wrapper script for rclone
-* Access remotes via http & ftp
-* Use without rebooting device
-* Add wrapper cmds to `rclone help`
-* Make remount possible via `su -M -c`
+### v1.6
+* Simplify custom global parameters
+* Fix & improve binding to SD
+* Specify additional  rclone ops with `ADD_PARAMS=`
+* Replace `rclone mount` ops via `REPLACE_PARAMS=`
 
 ### v1.5
 * Replace arm/arm64  `rclone` 1.48 bins built with Termux
@@ -267,23 +263,27 @@ Neither the author nor developer's will be held responsible for any damage/data 
 * Include `fusermount-wrapper.sh`
 * General Improvements
 
-### v1.6
-* Simplify custom global parameters
-* Fix & improve binding to SD
-* Specify additional  rclone ops with `ADD_PARAMS=`
-* Replace `rclone mount` ops via `REPLACE_PARAMS=`
+### v1.4
+* Add ability to disable a remote 
+* Add a wrapper script for rclone
+* Access remotes via http & ftp
+* Use without rebooting device
+* Add wrapper cmds to `rclone help`
+* Make remount possible via `su -M -c`
 
-### v1.7
-* Add ability to disable HTTP/FTP
-* Link rest of default params to custom vars
-* Exclude some custom params from globals
-* Make some globals exclusive 
-* Change `BINDPOINT=` to `SDBINDPOINT=`
-* Fix bug with custom params
-* Set `PATH=` to change priority of used bins
+### v1.3
+* Move user rclone.conf & related to `/sdcard/.rclone/`
+* Control global `--vfs-cache-mode` via simple files placed in `/sdcard/.rclone/`
+* Specify custom params for individual remotes via `/sdcard/.rclone/.REMOTENAME.params`
 
-### v1.8
-* Support for Work Profiles `PROFILE=`
-* Isolate to Work Profiles `ISOLATE=`
+### v1.2
+* Change install process
+* Changes for full systemless
+* Improve mount reliability
+* Symlink mountpoint to `/storage/`
+
+### v1.1
+* Initial release
+* rclone mount
 
 [![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
