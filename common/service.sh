@@ -74,15 +74,16 @@ DIRPERMS=0775
 FILEPERMS=0644
 UMASK=002
 BINDSD=0
-HTTP=1
+SYNCWIFI=1
+HTTP=0
 HTTP_ADDR=127.0.0.1:38762
-FTP=1
+FTP=0
 FTP_ADDR=127.0.0.1:38763
 SFTP=0
 SFTP_ADDR=127.0.0.1:38722
-SFTP_USER=sftpuser0
-SFTP_PASS=cHaNGEmE
-SYNCWIFI=1
+SFTP_USER=
+SFTP_PASS=
+
 
 if [[ -z ${INTERACTIVE} ]]; then
 
@@ -100,7 +101,7 @@ custom_params () {
 
     if [[ ${remote} = global ]]; then
 
-        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD ADD_PARAMS REPLACE_PARAMS NETCHK NETCHK_ADDR HTTP FTP HTTP_ADDR FTP_ADDR SFTP SFTP_ADDR SFTP_USER SFTP_PASS PROFILE ISOLATE"
+        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD ADD_PARAMS REPLACE_PARAMS NETCHK NETCHK_IF NETCHK_ADDR HTTP FTP HTTP_ADDR FTP_ADDR SFTP SFTP_ADDR SFTP_USER SFTP_PASS PROFILE ISOLATE"
 
     else
 
@@ -156,7 +157,17 @@ global_params () {
 
 net_chk() {
 
-    ping -c 5 ${NETCHK_ADDR}
+    if [ -z ${NETCHK_IF} ]; then
+
+        NETCHK_IF=" "
+
+    else
+
+        NETCHK_IF=" -I ${NETCHK_IF} "
+    
+    fi
+
+    ping ${NETCHK_IF} -c 5 ${NETCHK_ADDR}
 
 }
 
@@ -261,44 +272,51 @@ sd_binder () {
 }
 
 syncd_service () {
-    
+
     if [[ ! -z ${SDSYNCDIRS} ]]; then
 
-        export PIDFILE=${HOME}/tmp/${remote}-syncd.pids
+        export PIDFILE=${HOME}/.tmp/${remote}-syncd.pids
 
         kill -9 $(cat ${PIDFILE}) >> /dev/null 2>&1
 rm ${PIDFILE} >> /dev/null 2>&1
 
-        if [[ ! -d ${HOME}/tmp ]]; then
+        rm ${PIDFILE} >> /dev/null 2>&1
 
-            mkdir -p ${HOME}/tmp
+        if [[ ! -d ${HOME}/.tmp ]]; then
+
+            mkdir -p ${HOME}/.tmp
 
         fi
 
+    export PATH
     export CLOUDROOTMOUNTPOINT
     export PROFILE
     export HOME
     export remote
     export SYNCWIFI
+    export NETCHK_ADDR
+
+        IFS=$':'
 
         for SYNCDIR in ${SDSYNCDIRS[@]}; do
 
             export SYNCDIR
 
-            ${HOME}/syncd.sh & >> /dev/null 2>&1
+            ${HOME}/syncd.sh >> /dev/null 2>&1 &
 
         done
 
     fi
 
+    unset IFS
     unset SDSYNCDIRS
     unset SYNCDIR
-
 
 }
 
 reset_params () {
     
+    unset IFS
     unset SDBINDPOINT
     unset BINDSD
     unset RCLONE_PARAMS
@@ -307,7 +325,26 @@ reset_params () {
     unset SYNCDIR
     unset SDSYNCDIRS
     unset PIDFILE
+    LOGFILE=${USER_CONFDIR}/rclone.log
+    LOGLEVEL=NOTICE
+    CACHEMODE=off
+    READCHUNKSIZE=1M
+    CACHEMAXSIZE=1G
+    CHUNKSIZE=1M
+    CHUNKTOTAL=1G
+    CACHEWORKERS=1
+    CACHEINFOAGE=1h0m0s
+    DIRCACHETIME=30m0s
+    ATTRTIMEOUT=30s
+    BUFFERSIZE=0
+    READAHEAD=128k
+    M_UID=0
+    M_GID=1015
+    DIRPERMS=0775
+    FILEPERMS=0644
+    UMASK=002
     SYNCWIFI=1
+
 }
 
 rclone_mount () {
@@ -358,7 +395,7 @@ rclone_mount () {
 
     mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
 
-    su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon & >> /dev/null 2>&1
+    su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon >> /dev/null 2>&1 &
 
 }
 
@@ -548,7 +585,7 @@ if [[ ${FTP} = 1 ]]; then
     
 fi
 
-if [[ ${SFTP} = 1 ]]; then
+if [[ ${SFTP} = 1 ]] && [[ ! -z ${SFTP_USER} ]] && [[ ! -z ${SFTP_PASS} ]]; then
 
     if $(/sbin/rclone serve sftp ${CLOUDROOTMOUNTPOINT} --addr ${SFTP_ADDR} --user ${SFTP_USER} --pass ${SFTP_PASS} --no-checksum --no-modtime --read-only >> /dev/null 2>&1 &); then
 
