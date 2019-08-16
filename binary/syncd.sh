@@ -16,11 +16,11 @@ if [[ ${SYNCWIFI} = 1 ]]; then
         
     done
     
-    ${HOME}/rclone copy "/storage/emulated/${PROFILE}/${SYNCDIR}" "$CLOUDROOTMOUNTPOINT/${remote}/${SYNCDIR}" --retries-sleep=10m --retries 6 >> /dev/null 2>&1
+nice -n 19 ionice -c 2 -n 7 ${HOME}/rclone copy "/storage/emulated/${PROFILE}/${SYNCDIR}" "$CLOUDROOTMOUNTPOINT/${remote}/${SYNCDIR}" --retries-sleep=10m --retries 6 --transfers 1 --multi-thread-streams 1 >> /dev/null 2>&1
 
 else
 
-    ${HOME}/rclone copy "/storage/emulated/${PROFILE}/${SYNCDIR}" "$CLOUDROOTMOUNTPOINT/${remote}/${SYNCDIR}" --retries-sleep=10m --retries 6 >> /dev/null 2>&1
+nice -n 19 ionice -c 2 -n 7 ${HOME}/rclone copy "/storage/emulated/${PROFILE}/${SYNCDIR}" "$CLOUDROOTMOUNTPOINT/${remote}/${SYNCDIR}" --retries-sleep=10m --retries 6 --transfers 1 --multi-thread-streams 1 >> /dev/null 2>&1
 
 fi
 

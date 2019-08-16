@@ -39,7 +39,7 @@ CLOUDROOTMOUNTPOINT=/mnt/cloud
 USER_CONFDIR=/sdcard/.rclone
 USER_CONF=${USER_CONFDIR}/rclone.conf
 PROFILE=0
-DATA_MEDIA=/data/media/${PROFILE}
+DATA_MEDIA=/data/media
 RUNTIME_R=/mnt/runtime/read
 RUNTIME_W=/mnt/runtime/write
 RUNTIME_D=/mnt/runtime/default
@@ -213,8 +213,8 @@ sd_binder () {
 
         if [[ -z ${SDBINDPOINT} ]]; then 
 
-            mkdir -p ${DATA_MEDIA}/Cloud/${remote}
-            chown media_rw:media_rw ${DATA_MEDIA}/Cloud/$remote
+            mkdir -p ${DATA_MEDIA}/${PROFILE}/Cloud/${remote}
+            chown media_rw:media_rw ${DATA_MEDIA}/${PROFILE}/Cloud/$remote
 
             BINDPOINT=${BINDPOINT_D}/${remote}
 
@@ -240,8 +240,8 @@ sd_binder () {
 
         else 
 
-            mkdir ${DATA_MEDIA}/${SDBINDPOINT} >> /dev/null 2>&1
-            chown media_rw:media_rw ${DATA_MEDIA}/${SDBINDPOINT}
+            mkdir ${DATA_MEDIA}/${PROFILE}/${SDBINDPOINT} >> /dev/null 2>&1
+            chown media_rw:media_rw ${DATA_MEDIA}/${PROFILE}/${SDBINDPOINT}
 
             USER_BINDPOINT=${SDBINDPOINT}
             BINDPOINT=${RUNTIME_D}/emulated/${PROFILE}/${USER_BINDPOINT}
@@ -264,7 +264,11 @@ sd_binder () {
 
             fi
 
-            echo "[$remote] available at: -> [/sdcard/${SDBINDPOINT}]"
+            echo "[$remote] available at: -> [/storage/emulated/${PROFILE}/${SDBINDPOINT}]"
+            
+            echo ${BINDPOINT}
+            
+            unset BINDPOINT
 
         fi
 
@@ -319,6 +323,7 @@ reset_params () {
     unset IFS
     unset SDBINDPOINT
     unset BINDSD
+    unset ISOLATE
     unset RCLONE_PARAMS
     unset REPLACE_PARAMS
     unset ADD_PARAMS
@@ -343,6 +348,7 @@ reset_params () {
     DIRPERMS=0775
     FILEPERMS=0644
     UMASK=002
+    PROFILE=0
     SYNCWIFI=1
 
 }
