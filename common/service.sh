@@ -75,6 +75,7 @@ FILEPERMS=0644
 UMASK=002
 BINDSD=0
 SYNCWIFI=1
+SYNC_BATTLVL=0
 HTTP=0
 HTTP_ADDR=127.0.0.1:38762
 FTP=0
@@ -105,7 +106,7 @@ custom_params () {
 
     else
 
-        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD SDBINDPOINT ADD_PARAMS REPLACE_PARAMS PROFILE ISOLATE SDSYNCDIRS SYNCWIFI"
+        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD SDBINDPOINT ADD_PARAMS REPLACE_PARAMS PROFILE ISOLATE SDSYNCDIRS SYNCWIFI SYNC_BATTLVL"
     fi
 
     BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
@@ -266,8 +267,6 @@ sd_binder () {
 
             echo "[$remote] available at: -> [/storage/emulated/${PROFILE}/${SDBINDPOINT}]"
             
-            echo ${BINDPOINT}
-            
             unset BINDPOINT
 
         fi
@@ -282,7 +281,7 @@ syncd_service () {
         export PIDFILE=${HOME}/.tmp/${remote}-syncd.pids
 
         kill -9 $(cat ${PIDFILE}) >> /dev/null 2>&1
-rm ${PIDFILE} >> /dev/null 2>&1
+        rm ${PIDFILE} >> /dev/null 2>&1
 
         rm ${PIDFILE} >> /dev/null 2>&1
 
@@ -298,6 +297,7 @@ rm ${PIDFILE} >> /dev/null 2>&1
     export HOME
     export remote
     export SYNCWIFI
+    export SYNC_BATTLVL
     export NETCHK_ADDR
 
         IFS=$':'
@@ -315,11 +315,14 @@ rm ${PIDFILE} >> /dev/null 2>&1
     unset IFS
     unset SDSYNCDIRS
     unset SYNCDIR
+    unset SYNCWIFI
+    SYNC_BATTLVL=0
+    SYNCWIFI=1
 
 }
 
 reset_params () {
-    
+
     unset IFS
     unset SDBINDPOINT
     unset BINDSD
@@ -350,6 +353,7 @@ reset_params () {
     UMASK=002
     PROFILE=0
     SYNCWIFI=1
+    SYNC_BATTLVL=0
 
 }
 
@@ -364,17 +368,17 @@ rclone_mount () {
         READONLY=" "
 
     fi
-    
+
     if [[ ${ADD_PARAMS} = 0 ]]; then
-    
+
         unset ADD_PARAMS
-        
+
     fi
-    
+
     if [[ ${REPLACE_PARAMS} = 0 ]]; then
-    
+
         unset REPLACE_PARAMS
-        
+
     fi
 
     if [[ -z ${REPLACE_PARAMS} ]]; then
@@ -549,7 +553,7 @@ ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: |
         custom_params
 
         if [[ ${ISOLATE} = 1 ]] && [[ ${PROFILE} -gt 0 ]] && [[ ${BINDSD} = 1 ]]; then
-        
+
             CLOUDROOTMOUNTPOINT=/data/media/${PROFILE}/.cloud
 
         fi
