@@ -74,7 +74,8 @@ DIRPERMS=0775
 FILEPERMS=0644
 UMASK=002
 BINDSD=0
-SYNCWIFI=1
+SYNC_WIFI=1
+SYNC_CHARGE=0
 SYNC_BATTLVL=0
 HTTP=0
 HTTP_ADDR=127.0.0.1:38762
@@ -106,7 +107,7 @@ custom_params () {
 
     else
 
-        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD SDBINDPOINT ADD_PARAMS REPLACE_PARAMS PROFILE ISOLATE SDSYNCDIRS SYNCWIFI SYNC_BATTLVL"
+        PARAMS="DISABLE LOGFILE LOGLEVEL CACHEMODE CHUNKSIZE CHUNKTOTAL CACHEWORKERS CACHEINFOAGE DIRCACHETIME ATTRTIMEOUT BUFFERSIZE READAHEAD M_UID M_GID DIRPERMS FILEPERMS READONLY BINDSD SDBINDPOINT ADD_PARAMS REPLACE_PARAMS PROFILE ISOLATE SDSYNCDIRS SYNC_WIFI SYNC_BATTLVL SYNC_CHARGE"
     fi
 
     BAD_SYNTAX="(^\s*#|^\s*$|^\s*[a-z_][^[:space:]]*=[^;&\(\`]*$)"
@@ -283,8 +284,6 @@ syncd_service () {
         kill -9 $(cat ${PIDFILE}) >> /dev/null 2>&1
         rm ${PIDFILE} >> /dev/null 2>&1
 
-        rm ${PIDFILE} >> /dev/null 2>&1
-
         if [[ ! -d ${HOME}/.tmp ]]; then
 
             mkdir -p ${HOME}/.tmp
@@ -298,6 +297,7 @@ syncd_service () {
     export remote
     export SYNCWIFI
     export SYNC_BATTLVL
+    export SYNC_CHARGE
     export NETCHK_ADDR
 
         IFS=$':'
@@ -315,9 +315,9 @@ syncd_service () {
     unset IFS
     unset SDSYNCDIRS
     unset SYNCDIR
-    unset SYNCWIFI
     SYNC_BATTLVL=0
-    SYNCWIFI=1
+    SYNC_WIFI=1
+    SYNC_CHARGE=0
 
 }
 
@@ -352,8 +352,9 @@ reset_params () {
     FILEPERMS=0644
     UMASK=002
     PROFILE=0
-    SYNCWIFI=1
+    SYNC_WIFI=1
     SYNC_BATTLVL=0
+    SYNC_CHARGE=0
 
 }
 
@@ -405,7 +406,7 @@ rclone_mount () {
 
     mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
 
-    su -M -p -c nice -n 19 ionice -c 2 -n 7 $HOME/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon >> /dev/null 2>&1 &
+su -M -p -c nice -n 19 ionice -c 2 -n 7 ${HOME}/rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon >> /dev/null 2>&1 &
 
 }
 
@@ -413,7 +414,7 @@ COUNT=0
 
 if [[ ${INTERACTIVE} = 0 ]]; then
 
-    until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) = 1 ]] && [[ $(getprop service.bootanim.exit) = 1 ]] && [[ $(getprop init.svc.bootanim) = stopped ]] && [[ -e ${USER_CONF} ]] || [[ ${COUNT} -eq 240 ]]; do
+    until [[ $(getprop sys.boot_completed) = 1 ]] && [[ $(getprop dev.bootcomplete) = 1 ]] && [[ $(getprop init.svc.bootanim) = stopped ]] && [[ -e ${USER_CONF} ]] || [[ ${COUNT} -eq 240 ]]; do
 
         sleep 5
         ((++COUNT))
@@ -534,7 +535,7 @@ echo "Default CACHEMODE ${CACHEMODE}"
 
 sleep 5
 
-${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: | 
+LD_LIBRARY_PATH=${HOME} ${HOME}/rclone listremotes --config ${CONFIGFILE}|cut -f1 -d: | 
 
     while read remote; do
 
