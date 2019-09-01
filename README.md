@@ -92,7 +92,9 @@ Specification of rclone parameters on a per remote basis can be created inside h
 
         BINDSD=0  ( default binds remote to /sdcard/Cloud/* )
 
-        SDBINDPOINT=  ( relative to /sdcard/ )
+        SDBINDPOINT=  ( relative to /storage/emulated/0)
+
+        SDSYNCDIRS= (relative to /storage/emulated/0)
 
         ADD_PARAMS=0
 
@@ -129,6 +131,8 @@ Specification of global rclone parameters can be created in
 
         NETCHK_ADDR=google.com
 
+        NETCHK_IF=
+
         HTTP=1
 
         HTTP_ADDR=127.0.0.1:38762
@@ -140,6 +144,7 @@ Specification of global rclone parameters can be created in
 - Excluded Parameters
 
         SDBINDPOINT=
+        SDSYNCDIRS=
 
 - Custom globals params example #1
 
@@ -161,7 +166,7 @@ Specification of global rclone parameters can be created in
 
 In order for users to  appropriately utilize  `ADD_PARAMS=` or `REPLACE_PARAMS=` they will need a little background on the parameters that are set by default. 
 
-- Currently specified params shown here 
+- Currently specified params shown here ↓
 
   (directly from service.sh):
 
@@ -201,6 +206,21 @@ When adding work profiles through sandboxing apps such as [Island](https://play.
 
    **NOTE:** _Virtual SDs for work profiles & or additional users start at `/storage/emulated/`**10**. Additional profiles increase the ending directory integer (e.g. `/storage/emulated/`**11**). This integer is used with `PROFILE=`_
 ---
+## SD Sync & Remotes
+
+- SD sync example # 1
+
+         /sdcard/.rclone/.Backup.param
+
+         1| SDSYNCDIRS=DCIM/Camera:Photos:My Projects
+         2| CACHEMODE=writes
+         3| CACHEINFOAGE=11s
+         4| DIRCACHETIME=10s
+         5| ATTRTIMEOUT=10s
+         6| 
+
+  **NOTE:** _`SDSYNCDIRS=` paths are relative to /storage/emulated/`PROFILE=0`. Paths are to be separated using a `: `. This variable is should be whitespace friendly._
+---
 ## Known Issues
 
 - VLC  takes a long time to load media as it opens file in write mode when using it's internal browser. 
@@ -218,7 +238,7 @@ specify `CACHEMODE=off` in `/sdcard/.rclone/.ALIASNAME.param`
 ---
 ## Disclaimer
 
-Neither the author nor developer's will be held responsible for any damage/data loss that may occur during use of this module. While we have done our best to make sure no harm will come about, no guarantees can be made. Keep in mind the binaries included in this project were originally intended to be ran on PCs which may cause unforseen issues.
+Neither the author nor developer's will be held responsible for any damage/data loss that may occur during use of this module. While we have done our best to make sure no harm will come about, no guarantees can be made. Keep in mind the binaries included in this project were originally intended to be ran on PCs which may cause unforseen issues. Always check this document before updating to new releases as significant changes may occur. 
 
 ---
 ## Credits
@@ -235,7 +255,8 @@ Neither the author nor developer's will be held responsible for any damage/data 
 
 ### v1.8
 * Support for Work Profiles `PROFILE=`
-* Isolate to Work Profiles `ISOLATE=`
+* Isolate to Work Profiles `ISOLATE=1`
+* Support syncing from SD to remote 
 
 ### v1.7
 * Add ability to disable HTTP/FTP
