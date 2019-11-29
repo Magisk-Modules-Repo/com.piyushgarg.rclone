@@ -138,6 +138,8 @@ Specification of global rclone parameters can be created in
 - Excluded Parameters
 
         SDBINDPOINT=
+        
+        BUCKET=
 
 - Custom globals params example #1
 
@@ -172,7 +174,7 @@ In order for users to  appropriately utilize  `ADD_PARAMS=` or `REPLACE_PARAMS=`
 
 - The script then takes `RCLONE_PARAMS=` and fills in blank at `${RCLONE_PARAMS}`
 
-  `rclone mount ${remote}: ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon &`
+  `rclone mount ${remote}:${BUCKET} ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon &`
 
   **NOTE:** _Everything before and after `${RCLONE_PARAMS}` cannot not be replaced even with `REPLACE_PARAMS=` specified._
 
