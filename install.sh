@@ -128,7 +128,7 @@ print_modname() {
   ui_print "*        Magisk Module        *"
   ui_print "*       by: piyushgarg        *"
   ui_print "*******************************"
-  ui_print "*rclone: (v1.48.0) mod: (v1.7)*"
+  ui_print "*rclone: (v1.48.0) mod: (v1.8)*"
   ui_print "*******************************"
 }
 
@@ -163,6 +163,10 @@ on_install() {
   unzip -p "$ZIPFILE" binary/rclone-wrapper.sh > $MODPATH/rclone-wrapper.sh
   ui_print "+ Extracting fusermount-wrapper.sh script to $MODPATH/fusermount-wrapper.sh"
   unzip -p "$ZIPFILE" binary/fusermount-wrapper.sh > $MODPATH/fusermount-wrapper.sh
+  ui_print "+ Extracting syncd.sh script to $MODPATH/syncd.sh"
+  unzip -p "$ZIPFILE" binary/syncd.sh > $MODPATH/syncd.sh
+ui_print "+ Extracting inotifywait-${ARCH} to $MODPATH/inotifywait"
+  unzip -p "$ZIPFILE" binary/inotifywait-${ARCH} > $MODPATH/inotifywait
 }
 
 # Only some special files require specific permissions
@@ -176,8 +180,10 @@ set_permissions() {
   set_perm $MODPATH/rclone 0 0 0755
   set_perm $MODPATH/fusermount 0 0 0755
   set_perm $MODPATH/fusermount-wrapper.sh 0 0 0755
-  set_perm $MODPATH/service.sh 0 0 0500
-  set_perm $MODPATH/rclone-wrapper.sh 0 0 0500
+  set_perm $MODPATH/service.sh 0 0 0755
+  set_perm $MODPATH/rclone-wrapper.sh 0 0 0755
+  set_perm $MODPATH/syncd.sh 0 0 0755
+  set_perm $MODPATH/inotifywait 0 0 0555
   ln -sf $MODPATH/rclone-wrapper.sh /sbin/rclone
   ui_print "✓ Now no need to reboot..."
   ui_print "+ Attempting to mount your [Remotes]:"

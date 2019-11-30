@@ -1,4 +1,4 @@
-## Rclone Remount v1.7 for Android
+## Rclone Remount v1.8
 ---
 
 Remount cloud storage locally during boot via rclone & fusermount directly on your Android powered smart device. 
@@ -26,6 +26,8 @@ We are constantly striving to improve this project & make it the best. If you ex
 - Access remotes via [ftp://127.0.0.1:38763](ftp://127.0.0.1:38763)
 
 - Mount bind to `/sdcard/` (see [ issue #5](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/5))
+
+- Support for Work Profiles 
 
 ---
 ## Configuration (pre-installing)
@@ -88,16 +90,18 @@ Specification of rclone parameters on a per remote basis can be created inside h
 
         UMASK=002  ( --umask )
 
-        BINDSD=0  ( default binds remote to /sdcard/Cloud* )
+        BINDSD=0  ( default binds remote to /sdcard/Cloud/* )
 
-        SDBINDPOINT=  ( relative to /sdcard/ )
+        SDBINDPOINT=  ( relative to /storage/emulated/0)
+
+        SDSYNCDIRS= (relative to /storage/emulated/0)
 
         ADD_PARAMS=0
 
         REPLACE_PARAMS=0
 
+        PROFILE=0
 
-    
    **NOTE:** _The above are defaults for all remotes without `.*.param` files containing opposing values. 
 
 - Custom remote params example #1
@@ -127,6 +131,8 @@ Specification of global rclone parameters can be created in
 
         NETCHK_ADDR=google.com
 
+        NETCHK_IF=
+
         HTTP=1
 
         HTTP_ADDR=127.0.0.1:38762
@@ -138,12 +144,14 @@ Specification of global rclone parameters can be created in
 - Excluded Parameters
 
         SDBINDPOINT=
+
+        SDSYNCDIRS=
         
         BUCKET=
 
 - Custom globals params example #1
 
-  _The following configuration will enable minimal caching for all remotes, bind to `/sdcard/Cloud/*`, disable HTTP/FTP & add the `-fast-list`/`--allow-non-empty` flags to their mounting command(s)._
+  _The following configuration will enable minimal caching for all remotes, bind to `/sdcard/Cloud/*`, disable HTTP/FTP & add the `--fast-list`/`--allow-non-empty` flags to their mounting command(s)._
 
          /sdcard/.rclone/.global.param
 
@@ -154,7 +162,6 @@ Specification of global rclone parameters can be created in
          5| FTP=0
          6| 
 
-
    **NOTE:** _Global parameters effect all remotes without `.*.parm` files containing opposing values. Some parameters are specific to globals while others have been excluded._
 
 ---
@@ -162,15 +169,15 @@ Specification of global rclone parameters can be created in
 
 In order for users to  appropriately utilize  `ADD_PARAMS=` or `REPLACE_PARAMS=` they will need a little background on the parameters that are set by default. 
 
-- Currently specified params shown here 
+- Currently specified params shown here ↓
 
   (directly from service.sh):
 
   `RCLONE_PARAMS=" --log-file ${LOGFILE} --log-level ${LOGLEVEL} --vfs-cache-mode ${CACHEMODE} --cache-dir ${CACHE} --cache-chunk-path ${CACHE_BACKEND} --cache-db-path ${CACHE_BACKEND} --cache-tmp-upload-path ${CACHE} --vfs-read-chunk-size ${READCHUNKSIZE} --vfs-cache-max-size ${CACHEMAXSIZE} --cache-chunk-size ${CHUNKSIZE} --cache-chunk-total-size ${CHUNKTOTAL} --cache-workers ${CACHEWORKERS} --cache-info-age ${CACHEINFOAGE} --dir-cache-time ${DIRCACHETIME} --attr-timeout ${ATTRTIMEOUT} --cache-chunk-no-memory --use-mmap --buffer-size ${BUFFERSIZE} --max-read-ahead ${READAHEAD} --no-modtime --no-checksum --uid ${M_UID} --gid ${M_GID} --allow-other --dir-perms ${DIRPERMS} --file-perms ${FILEPERMS} --umask ${UMASK} ${READONLY} ${ADD_PARAMS} "`
 
                                 ^
-  
-  **NOTE:** _When using the `ADD_PARAMS=` it will append any additonal params you wish to specify at the point of `${ADD_PARAMS}` (above) in a fill in the blank manner._
+
+    **NOTE:** _When using the `ADD_PARAMS=` it will append any additonal params you wish to specify at the point of `${ADD_PARAMS}` (above) in a fill in the blank manner._
 
 - The script then takes `RCLONE_PARAMS=` and fills in blank at `${RCLONE_PARAMS}`
 
@@ -181,11 +188,48 @@ In order for users to  appropriately utilize  `ADD_PARAMS=` or `REPLACE_PARAMS=`
 - When using `REPLACE_PARAMS=` `RCLONE_PARAMS=` becomes `RCLONE_PARAMS=" ${REPLACE_PARAMS} "`
 
 ---
+## Work Profiles & Users
+
+As of `v1.8` support for isolating & binding to work profiles or additional users has been included which may provide for some interesting use cases. 
+
+When adding work profiles through sandboxing apps such as [Island](https://play.google.com/store/apps/details?id=com.oasisfeng.island) or [Shelter](https://play.google.com/store/apps/details?id=net.typeblog.shelter) it will create a virtual SD for your sandboxed apps. This virtual SD can now be used with rclone remount. 
+
+- Work profile example #1 (Cloud Camera w/ Shelter)
+
+        open Shelter > find camera > clone to work profile
+
+        /sdcard/.rclone/.cloud-DCIM.param
+
+        1| BINDSD=1
+        2| SDBINDPOINT=DCIM
+        3| PROFILE=10
+        4| ISOLATE=1
+        5| CACHEMODE=writes
+        6| 
+
+   **NOTE:** _Virtual SDs for work profiles & or additional users start at `/storage/emulated/`**10**. Additional profiles increase the ending directory integer (e.g. `/storage/emulated/`**11**). This integer is used with `PROFILE=`_
+---
+## SD Sync & Remotes
+
+- SD sync example # 1
+
+         /sdcard/.rclone/.Backup.param
+
+         1| SDSYNCDIRS=DCIM/Camera:Photos:My Projects
+         2| CACHEMODE=writes
+         3| CACHEINFOAGE=11s
+         4| DIRCACHETIME=10s
+         5| ATTRTIMEOUT=10s
+         6| 
+
+  **NOTE:** _`SDSYNCDIRS=` paths are relative to /storage/emulated/`PROFILE=0`. Paths are to be separated using a `: `. This variable is should be whitespace friendly._
+---
 ## Known Issues
 
 - VLC  takes a long time to load media as it opens file in write mode when using it's internal browser. 
 
-   a. Create remote type alias for media dirs in rclone.conf and specify `CACHEMODE=off` in `/sdcard/.rclone/.ALIASNAME.param`
+   a. Create remote type alias for media dirs in rclone.conf and 
+specify `CACHEMODE=off` in `/sdcard/.rclone/.ALIASNAME.param`
 
 - Encrypted devices can not mount until unlock
 
@@ -197,7 +241,7 @@ In order for users to  appropriately utilize  `ADD_PARAMS=` or `REPLACE_PARAMS=`
 ---
 ## Disclaimer
 
-Neither the author nor developer's will be held responsible for any damage/data loss that may occur during use of this module. While we have done our best to make sure no harm will come about, no guarantees can be made. Keep in mind the binaries included in this project were originally intended to be ran on PCs which may cause unforseen issues.
+Neither the author nor developer's will be held responsible for any damage/data loss that may occur during use of this module. While we have done our best to make sure no harm will come about, no guarantees can be made. Keep in mind the binaries included in this project were originally intended to be ran on PCs which may cause unforseen issues. Always check this document before updating to new releases as significant changes may occur. 
 
 ---
 ## Credits
@@ -212,28 +256,25 @@ Neither the author nor developer's will be held responsible for any damage/data 
 ---
 ## Changelog
 
-### v1.1
-* Initial release
-* rclone mount
+### v1.8
+* Support for Work Profiles `PROFILE=`
+* Isolate to Work Profiles `ISOLATE=1`
+* Support syncing from SD to remote 
 
-### v1.2
-* Change install process
-* Changes for full systemless
-* Improve mount reliability
-* Symlink mountpoint to `/storage/`
+### v1.7
+* Add ability to disable HTTP/FTP
+* Link rest of default params to custom vars
+* Exclude some custom params from globals
+* Make some globals exclusive 
+* Change `BINDPOINT=` to `SDBINDPOINT=`
+* Fix bug with custom params
+* Set `PATH=` to change priority of used bins
 
-### v1.3
-* Move user rclone.conf & related to `/sdcard/.rclone/`
-* Control global `--vfs-cache-mode` via simple files placed in `/sdcard/.rclone/`
-* Specify custom params for individual remotes via `/sdcard/.rclone/.REMOTENAME.params`
-
-### v1.4
-* Add ability to disable a remote 
-* Add a wrapper script for rclone
-* Access remotes via http & ftp
-* Use without rebooting device
-* Add wrapper cmds to `rclone help`
-* Make remount possible via `su -M -c`
+### v1.6
+* Simplify custom global parameters
+* Fix & improve binding to SD
+* Specify additional  rclone ops with `ADD_PARAMS=`
+* Replace `rclone mount` ops via `REPLACE_PARAMS=`
 
 ### v1.5
 * Replace arm/arm64  `rclone` 1.48 bins built with Termux
@@ -246,19 +287,27 @@ Neither the author nor developer's will be held responsible for any damage/data 
 * Include `fusermount-wrapper.sh`
 * General Improvements
 
-### v1.6
-* Simplify custom global parameters
-* Fix & improve binding to SD
-* Specify additional  rclone ops with `ADD_PARAMS=`
-* Replace `rclone mount` ops via `REPLACE_PARAMS=`
+### v1.4
+* Add ability to disable a remote 
+* Add a wrapper script for rclone
+* Access remotes via http & ftp
+* Use without rebooting device
+* Add wrapper cmds to `rclone help`
+* Make remount possible via `su -M -c`
 
-### v1.7
-* Add ability to disable HTTP/FTP
-* Link rest of default params to custom vars
-* Exclude some custom params from globals
-* Make some globals exclusive 
-* Change `BINDPOINT=` to `SDBINDPOINT=`
-* Fix bug with custom params
-* Set `PATH=` to change priority of used bins
+### v1.3
+* Move user rclone.conf & related to `/sdcard/.rclone/`
+* Control global `--vfs-cache-mode` via simple files placed in `/sdcard/.rclone/`
+* Specify custom params for individual remotes via `/sdcard/.rclone/.REMOTENAME.params`
+
+### v1.2
+* Change install process
+* Changes for full systemless
+* Improve mount reliability
+* Symlink mountpoint to `/storage/`
+
+### v1.1
+* Initial release
+* rclone mount
 
 [![HitCount](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone.svg)](http://hits.dwyl.io/Magisk-Modules-Repo/compiyushgargrclone)
