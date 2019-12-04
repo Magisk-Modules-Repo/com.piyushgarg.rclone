@@ -102,6 +102,8 @@ Specification of rclone parameters on a per remote basis can be created inside h
 
         PROFILE=0
 
+        SUBPATH= ( root directory of share )
+
    **NOTE:** _The above are defaults for all remotes without `.*.param` files containing opposing values. 
 
 - Custom remote params example #1
@@ -117,6 +119,18 @@ Specification of rclone parameters on a per remote basis can be created inside h
          5| 
 
     **NOTE:** _There is no need to specify values you do not wish to change. Ensure a line break/carriage return exist after each specified param or they will not be parsed. For more information see [issue #2](https://github.com/Magisk-Modules-Repo/com.piyushgarg.rclone/issues/2)_
+
+- Custom remote params example #2 (using SUBPATH)
+
+   _The following configuration will mount the remote subdirectory `Batman` as the root directory of the share `[Movies]`._
+
+         /sdcard/.rclone/.Movies.param
+
+         1| SDBINDPOINT=BatmanMovie
+         2| SUBPATH=Batman
+         3| 
+
+   Now the mounted directory `/sdcard/BatmanMovie` is actually the remote directory `Movies/Batman`.
 
 ---
 ## Custom Globals
