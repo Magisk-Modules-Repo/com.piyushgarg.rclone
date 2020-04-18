@@ -253,6 +253,10 @@ Neither the author nor developer's will be held responsible for any damage/data 
 ---
 ## Changelog
 
+## v1.9
+* Add arm/arm64 1.51 bins downloaded from https://beta.rclone.org/
+* Commented fusermount wrapper
+
 ### v1.8
 * Support for Work Profiles `PROFILE=`
 * Isolate to Work Profiles `ISOLATE=1`
