@@ -16,13 +16,15 @@ id=com.piyushgarg.rclone
 if [ -e ${UPDDIR}/${id}/rclone-wrapper.sh ]; then
 
     ln -sf ${UPDDIR}/${id}/rclone-wrapper.sh /sbin/rclone
-    ln -sf ${UPDDIR}/${id}/fusermount-wrapper.sh /sbin/fusermount
+    #ln -sf ${UPDDIR}/${id}/fusermount-wrapper.sh /sbin/fusermount
+    ln -sf ${UPDDIR}/${id}/fusermount /sbin/fusermount
     HOME=${UPDDIR}/${id}
 
 elif [ -e ${IMGDIR}/${id}/rclone-wrapper.sh ]; then
 
     ln -sf ${IMGDIR}/${id}/rclone-wrapper.sh /sbin/rclone
-    ln -sf ${IMGDIR}/${id}/fusermount-wrapper.sh /sbin/fusermount
+    #ln -sf ${UPDDIR}/${id}/fusermount-wrapper.sh /sbin/fusermount
+    ln -sf ${UPDDIR}/${id}/fusermount /sbin/fusermount
     HOME=${IMGDIR}/${id}
 
 else

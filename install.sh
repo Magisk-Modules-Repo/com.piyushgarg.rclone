@@ -154,7 +154,7 @@ on_install() {
   ui_print "+ Extracting package contents..."
 
   ui_print "+ Extracting rclone-$ARCH to $MODPATH/rclone"
-  unzip -p "$ZIPFILE" binary/rclone-${ARCH} > $MODPATH/rclone
+  unzip -p "$ZIPFILE" binary/rclone-arm > $MODPATH/rclone
   ui_print "+ Extracting fusermount-$ARCH to $MODPATH/fusermount"
   unzip -p "$ZIPFILE" binary/fusermount-${ARCH} > $MODPATH/fusermount
   ui_print "+ Extracting lib-${ARCH}/libandroid-support.so to $MODPATH/libandroid-support.so"
