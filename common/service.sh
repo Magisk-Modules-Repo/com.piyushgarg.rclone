@@ -31,7 +31,7 @@ else
 
     ln -sf ${MODDIR}/rclone-wrapper.sh /sbin/rclone
 #    ln -sf ${MODDIR}/fusermount-wrapper.sh /sbin/fusermount
-    ln -sf ${UPDDIR}/${id}/fusermount /sbin/fusermount
+    ln -sf ${MODDIR}/${id}/fusermount /sbin/fusermount
     HOME=${MODDIR}
 
 fi
