@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-MODDIR=${0%/*}
+MODDIR="$(dirname -- "$(readlink -f -- "$0")")"
 UPDDIR=/data/adb/modules_update
 IMGDIR=/sbin/.core/img
 id=com.piyushgarg.rclone
