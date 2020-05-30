@@ -184,7 +184,11 @@ set_permissions() {
   set_perm $MODPATH/rclone-wrapper.sh 0 0 0755
   set_perm $MODPATH/syncd.sh 0 0 0755
   set_perm $MODPATH/inotifywait 0 0 0555
-  ln -sf $MODPATH/rclone-wrapper.sh /sbin/rclone
+
+  ln -sf $MODPATH/rclone /sbin/rclone
+  ln -sf $MODPATH/rclone-wrapper.sh /sbin/rclonew
+  ln -sf $MODPATH/fusermount /sbin/fusermount
+
   ui_print "✓ Now no need to reboot..."
   ui_print "+ Attempting to mount your [Remotes]:"
   ui_print "+ please wait..."

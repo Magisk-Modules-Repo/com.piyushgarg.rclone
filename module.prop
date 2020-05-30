@@ -1,8 +1,8 @@
 id=com.piyushgarg.rclone
 name=rclone-mount
-modVer=1.10
-BinVer=1.51.0
-version=rclone: (v1.51.0) mod: (v1.10)
-versionCode=107
+modVer=1.11
+BinVer=1.52.0
+version=rclone: (v1.52.0) mod: (v1.11)
+versionCode=111
 author=piyushgarg @ github.com
 description=Mount cloud storage locally using rclone & fusermount. Virtually limitless storage expansion with support for dozens of cloud providers. Extremely useful for streaming large media files without need for full caching. Binaries obtained directly from rclone.org. Please refer to README.md for more info.

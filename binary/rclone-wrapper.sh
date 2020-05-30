@@ -1,6 +1,6 @@
 #!/system/bin/sh
 
-MODDIR=${0%/*}
+MODDIR="$(dirname "$(readlink -f "$0")")"
 UPDDIR=/data/adb/modules_update
 IMGDIR=/sbin/.core/img
 id=com.piyushgarg.rclone
@@ -21,22 +21,48 @@ SD_BINDPOINT=${BINDPOINT_D}
 CLOUDROOTMOUNTPOINT=/mnt/cloud
 
 SCRIPTPID=$$
-
 export INTERACTIVE=1
 
+## resolve links - $0 may be a link to module home
+PRG="$0"
+
+# need this for relative symlinks
+while [ -h "$PRG" ] ; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG="`dirname "$PRG"`/$link"
+  fi
+done
+
+echo $PRG
+
+saveddir=`pwd`
+
+MODDIR2=`dirname "$PRG"`
+
+# make it fully qualified
+MODDIR2=`cd "$MODIR2" && pwd`
+
+cd "$saveddir"
+#echo $MODDIR2
+
 if [ -e ${UPDDIR}/${id}/rclone ]; then
-
     HOME=${UPDDIR}/${id}
-    
-elif [ -e ${IMGDIR}/${id}/rclone ]; then
 
+elif [ -e ${IMGDIR}/${id}/rclone ]; then
     HOME=${IMGDIR}/${id}
 
+elif [ -e ${MODDIR2}/${id}/rclone ]; then
+    HOME=${MODDIR2}/${id}
+
 else
-
     HOME=${MODDIR}
-
 fi
+
+echo $HOME
 
 CONFIGFILE=${HOME}/.config/rclone/rclone.conf
 
@@ -167,16 +193,13 @@ sd_unbind_func () {
     
 }
 
-sd_unbind () { 
+sd_unbind () {
 
-    ${HOME}/rclone listremotes --config                 ${CONFIGFILE}|cut -f1 -d: |
-
-        while read remote; do
-
+    ${HOME}/rclone listremotes --config ${CONFIGFILE} | cut -f1 -d: | while read remote; do
                 echo
-
                 custom_params
                 sd_unbind_func
+
         done >> /dev/null 2>&1
 }
 
