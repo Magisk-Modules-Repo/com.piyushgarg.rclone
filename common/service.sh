@@ -467,6 +467,16 @@ if [[ -e ${USER_CONFDIR}/.disable ]] && [[ ${INTERACTIVE} = 0 ]]; then
 
 fi
 
+if [[ ${INTERACTIVE} = 0 ]]; then
+
+    export INTERACTIVE=1
+
+    ${HOME}/service.sh
+
+    exit
+
+fi
+
 global_params
 
 if [[ ! -d ${CLOUDROOTMOUNTPOINT} ]]; then

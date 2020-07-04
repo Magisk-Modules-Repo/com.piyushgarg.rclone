@@ -253,6 +253,9 @@ Neither the author nor developer's will be held responsible for any damage/data 
 ---
 ## Changelog
 
+## v1.12
+* Fixed restart problems.
+
 ## v1.11
 * Add arm/arm64 1.52 bins downloaded from https://beta.rclone.org/v1.52.0/testbuilds/rclone-android-16-arm.gz
 * Fixed service.sh paths
