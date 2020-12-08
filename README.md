@@ -267,6 +267,23 @@ Neither the author nor developer's will be held responsible for any damage/data 
 ---
 ## Changelog
 
+## v1.13
+* Add arm/arm64 1.53 binaries downloaded from https://beta.rclone.org/v1.53.0/testbuilds/rclone-android-16-arm.gz
+
+## v1.12
+* Fixed restart problems.
+
+## v1.11
+* Add arm/arm64 1.52 bins downloaded from https://beta.rclone.org/v1.52.0/testbuilds/rclone-android-16-arm.gz
+* Fixed service.sh paths
+
+## v1.10
+* fixed fusermount wrapper
+
+## v1.9
+* Add arm/arm64 1.51 bins downloaded from https://beta.rclone.org/
+* Commented fusermount wrapper
+
 ### v1.8
 * Support for Work Profiles `PROFILE=`
 * Isolate to Work Profiles `ISOLATE=1`

@@ -7,31 +7,51 @@
 
 PATH=/system/bin:/sbin:/sbin/.core/busybox:/system/xbin
 
-MODDIR=${0%/*}
+MODDIR="$(dirname "$(readlink -f "$0")")"
 
 IMGDIR=/sbin/.core/img
 UPDDIR=/data/adb/modules_update
 id=com.piyushgarg.rclone
 
-if [ -e ${UPDDIR}/${id}/rclone-wrapper.sh ]; then
+## resolve links - $0 may be a link to module home
+PRG="$0"
 
-    ln -sf ${UPDDIR}/${id}/rclone-wrapper.sh /sbin/rclone
-    ln -sf ${UPDDIR}/${id}/fusermount-wrapper.sh /sbin/fusermount
+# need this for relative symlinks
+while [ -h "$PRG" ] ; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG="`dirname "$PRG"`/$link"
+  fi
+done
+
+saveddir=`pwd`
+MODDIR2=`dirname "$PRG"`
+# make it fully qualified
+MODDIR2=`cd "$MODIR2" && pwd`
+cd "$saveddir"
+#echo 3 $MODDIR2
+
+if [ -e ${UPDDIR}/${id}/rclone ]; then
     HOME=${UPDDIR}/${id}
 
-elif [ -e ${IMGDIR}/${id}/rclone-wrapper.sh ]; then
-
-    ln -sf ${IMGDIR}/${id}/rclone-wrapper.sh /sbin/rclone
-    ln -sf ${IMGDIR}/${id}/fusermount-wrapper.sh /sbin/fusermount
+elif [ -e ${IMGDIR}/${id}/rclone ]; then
     HOME=${IMGDIR}/${id}
 
+elif [ -e ${MODDIR2}/${id}/rclone ]; then
+    HOME=${MODDIR2}/${id}
+
 else
-
-    ln -sf ${MODDIR}/rclone-wrapper.sh /sbin/rclone
-    ln -sf ${MODDIR}/fusermount-wrapper.sh /sbin/fusermount
     HOME=${MODDIR}
-
 fi
+
+echo $HOME
+
+ln -sf ${HOME}/rclone /sbin/rclone
+ln -sf ${HOME}/fusermount /sbin/fusermount
+ln -sf ${HOME}/rclone-wrapper.sh /sbin/rclonew
 
 #MODULE VARS
 SYSBIN=/system/bin
@@ -448,6 +468,16 @@ fi
 if [[ -e ${USER_CONFDIR}/.disable ]] && [[ ${INTERACTIVE} = 0 ]]; then 
 
     exit 0
+
+fi
+
+if [[ ${INTERACTIVE} = 0 ]]; then
+
+    export INTERACTIVE=1
+
+    ${HOME}/service.sh
+
+    exit
 
 fi
 
