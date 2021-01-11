@@ -430,7 +430,7 @@ rclone_mount () {
 
     mkdir -p ${CLOUDROOTMOUNTPOINT}/${remote}
 
-su -M -p -c nice -n 19 ionice -c 2 -n 7 ${HOME}/rclone mount ${remote}:${SUBPATH} ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon >> /dev/null 2>&1 &
+    su -M -p -c nice -n 19 ionice -c 2 -n 7 ${HOME}/rclone mount "${remote}:${SUBPATH}" ${CLOUDROOTMOUNTPOINT}/${remote} --config ${CONFIGFILE} ${RCLONE_PARAMS} --daemon >> /dev/null 2>&1 &
 
 }
 
