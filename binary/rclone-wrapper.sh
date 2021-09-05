@@ -141,23 +141,17 @@ disable () {
 
 unmount () {
 
-    echo "Killing 107 & Unmounting Remotes...."
-    
-    echo ${SCRIPTPID}
+    echo "Unmounting Remotes...."
     
     killall -2 rclone
 
-    echo "  2"
-    
     sleep 1
     
     umount -lf ${CLOUDROOTMOUNTPOINT}/* >> /dev/null 2>&1
     
-    echo "   3"
     umount -lf ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
 
-    echo "   4"
-    $HOME/rclone purge ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
+    "$HOME"/rclone purge ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
 
     echo "Remotes unmounted."
 }
