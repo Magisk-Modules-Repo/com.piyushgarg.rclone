@@ -1,6 +1,6 @@
 id=com.piyushgarg.rclone
 name=rclone-mount
-modVer=1.14
+modVer=1.16
 BinVer=1.56.0
 version=rclone: (v1.56.0) mod: (v1.14)
 versionCode=114
