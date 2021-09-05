@@ -267,18 +267,6 @@ Neither the author nor developer's will be held responsible for any damage/data 
 ---
 ## Changelog
 
-### v1.15
-* Used @Zackptg5's MMT-EX module template.
-* Cleaned all install & wrapper scripts.
-* Fixed bugs related to `rclone` command not working (proper wrapper script placement).
-* All the webservers (SFTP/FTP/HTTP) work fine now.
-* Bring back x86 and x86_64 support.
-* Updated all binaries (extracted from Termux builds).
-  - `libandroid-support` (28)
-  - `rclone` (1.55.0)
-  - `fusermount` (2.9.9)
-  - `inotifywait` (3.20.11.0)
-
 ## v1.14
 * Updated arm 1.56 binary downloaded from https://beta.rclone.org/v1.56.0/testbuilds/rclone-android-16-armv7a.gz
 
