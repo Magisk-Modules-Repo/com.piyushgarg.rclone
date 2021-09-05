@@ -117,7 +117,7 @@ config () {
     
     fi
      
-    ${HOME}/rclone config && cp ${HOME}/.config/rclone/rclone.conf ${USER_CONFDIR}/rclone.conf && echo && ${HOME}/rclone-wrapper.sh remount
+    ${HOME}/rclone config && cp ${HOME}/.config/rclone/rclone.conf ${USER_CONFDIR}/rclone.conf && echo && ${HOME}/rclonew remount
 
 }
 

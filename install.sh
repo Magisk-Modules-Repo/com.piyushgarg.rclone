@@ -126,9 +126,8 @@ print_modname() {
   ui_print "*******************************"
   ui_print "*        rclone-mount         *"
   ui_print "*        Magisk Module        *"
-  ui_print "*       by: piyushgarg        *"
   ui_print "*******************************"
-  ui_print "*rclone: (v1.56.0) mod: (v1.14)*"
+  ui_print "+ rclone versoin $(curl https://beta.rclone.org/version.txt)"
   ui_print "*******************************"
 }
 
@@ -140,6 +139,9 @@ on_install() {
 
   ui_print "* Detected arch: $ARCH"
   ui_print "+ Extracting package contents..."
+  ui_print "+ ====="
+  ui_print "+ rclone versoin $(curl https://beta.rclone.org/version.txt)"
+  ui_print "+ ====="
 
   if [ "$ARCH" == "arm" ];then
     ui_print "+ downloading rclone-$ARCH to $MODPATH/rclone"
@@ -159,8 +161,8 @@ on_install() {
   unzip -p "$ZIPFILE" binary/fusermount-${ARCH} > $MODPATH/fusermount
   ui_print "+ Extracting lib-${ARCH}/libandroid-support.so to $MODPATH/libandroid-support.so"
   unzip -p "$ZIPFILE" lib-${ARCH}/libandroid-support.so > $MODPATH/libandroid-support.so
-  ui_print "+ Extracting rclone-wrapper.sh script to $MODPATH/rclone-wrapper.sh"
-  unzip -p "$ZIPFILE" binary/rclone-wrapper.sh > $MODPATH/rclone-wrapper.sh
+  ui_print "+ Extracting rclone-wrapper.sh script to $MODPATH/rclonew"
+  unzip -p "$ZIPFILE" binary/rclone-wrapper.sh > $MODPATH/rclonew
   ui_print "+ Extracting fusermount-wrapper.sh script to $MODPATH/fusermount-wrapper.sh"
   unzip -p "$ZIPFILE" binary/fusermount-wrapper.sh > $MODPATH/fusermount-wrapper.sh
   ui_print "+ Extracting syncd.sh script to $MODPATH/syncd.sh"
@@ -181,12 +183,12 @@ set_permissions() {
   set_perm $MODPATH/fusermount 0 0 0755
   set_perm $MODPATH/fusermount-wrapper.sh 0 0 0755
   set_perm $MODPATH/service.sh 0 0 0755
-  set_perm $MODPATH/rclone-wrapper.sh 0 0 0755
+  set_perm $MODPATH/rclonew 0 0 0755
   set_perm $MODPATH/syncd.sh 0 0 0755
   set_perm $MODPATH/inotifywait 0 0 0555
 
   ln -sf $MODPATH/rclone /sbin/rclone
-  ln -sf $MODPATH/rclone-wrapper.sh /sbin/rclonew
+  ln -sf $MODPATH/rclonew /sbin/rclonew
   ln -sf $MODPATH/fusermount /sbin/fusermount
 
   ui_print "✓ Now no need to reboot..."
@@ -197,7 +199,7 @@ set_permissions() {
     if [[ -e /sdcard/.rclone/rclone.conf ]]; then
       
         export INTERACTIVE=1
-        $MODPATH/rclone-wrapper.sh remount
+        $MODPATH/rclonew remount
         
     else 
     
