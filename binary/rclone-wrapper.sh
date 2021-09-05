@@ -155,6 +155,7 @@ unmount () {
 
     $HOME/rclone purge ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
 
+    echo "Remotes unmounted."
 }
 
 sd_unbind_func () {
