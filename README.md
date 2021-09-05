@@ -271,7 +271,7 @@ Neither the author nor developer's will be held responsible for any damage/data 
 * Reverted 1.15
 * faster download via magisk
 * Download rclone during installation from the https://beta.rclone.org/test/testbuilds-latest
-* DLNA support, use DLNA=1, DLNA_ADDR and DLNA_NAME=media in /sdcard/.rclone/.global.param
+* DLNA support, use DLNA=1(0->default), DLNA_ADDR(default->:38792) and DLNA_NAME=(default->media) in /sdcard/.rclone/.global.param
 * Require busybox (curl and gunzip)
 * Drastically removed module size.
 
