@@ -143,16 +143,20 @@ unmount () {
 
     echo "Killing & Unmounting Remotes...."
     
-    echo
+    echo ${SCRIPTPID}
     
     kill $(pgrep -f rclone| grep -v ${SCRIPTPID}) >> /dev/null 2>&1
+
+    echo 2
     
     sleep 1
     
     umount -lf ${CLOUDROOTMOUNTPOINT}/* >> /dev/null 2>&1
     
+    echo 3
     umount -lf ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
 
+    echo 4
     $HOME/rclone purge ${CLOUDROOTMOUNTPOINT} >> /dev/null 2>&1
 
     echo "Remotes unmounted."
