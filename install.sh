@@ -126,8 +126,8 @@ print_modname() {
   ui_print "*******************************"
   ui_print "*        rclone-mount         *"
   ui_print "*        Magisk Module        *"
-  ui_print "*******************************"
-  ui_print "+ rclone versoin $(curl https://beta.rclone.org/version.txt)"
+  ui_print "+       rclone version"
+  ui_print "+ $(curl https://beta.rclone.org/version.txt)"
   ui_print "*******************************"
 }
 
@@ -140,7 +140,6 @@ on_install() {
   ui_print "* Detected arch: $ARCH"
   ui_print "+ Extracting package contents..."
   ui_print "+ ====="
-  ui_print "+ rclone versoin $(curl https://beta.rclone.org/version.txt)"
   ui_print "+ ====="
 
   if [ "$ARCH" == "arm" ];then
