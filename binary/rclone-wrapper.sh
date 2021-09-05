@@ -141,7 +141,7 @@ disable () {
 
 unmount () {
 
-    echo "Killing & Unmounting Remotes...."
+    echo "Killing 103 & Unmounting Remotes...."
     
     echo ${SCRIPTPID}
     
