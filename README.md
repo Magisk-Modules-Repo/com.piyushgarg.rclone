@@ -272,6 +272,7 @@ Neither the author nor developer's will be held responsible for any damage/data 
 * faster download via magisk
 * Download rclone binaries directly from the https://beta.rclone.org/test/testbuilds-latest
 * DLNA support, use DLNA=1, DLNA_ADDR and DLNA_NAME=media in /sdcard/.rclone/.global.param
+* Require busybox (curl and gunzip)
 
 ## v1.14
 * Updated arm 1.56 binary downloaded from https://beta.rclone.org/v1.56.0/testbuilds/rclone-android-16-armv7a.gz
